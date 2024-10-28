@@ -1,4 +1,4 @@
-from download.download import download_file, civitai_download
+from download.download import download_file, civitai_download, url_download
 from token.token import get_token, store_token, prompt_for_civitai_token
 
 if __name__=='__main__':
