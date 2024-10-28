@@ -7,9 +7,14 @@ from urllib.parse import urlparse, parse_qs, unquote, urljoin
 CHUNK_SIZE = 1638400
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 
-base_url="https://civitai.com/api/download/models"
+base_url="https://civitai.com/api/download/models/"
 
-def download_file(model_id: int, output_path: str, token: str):
+def civitai_download(model_id: int, local_dir: str, token: str):
+    url = urljoin(base_url, str(model_id), allow_fragments=False)
+    download_file(url, local_dir, token)
+    return url, local_dir, token
+
+def download_file(url: str, output_path: str, token: str):
     headers = {
         'Authorization': f'Bearer {token}',
         'User-Agent': USER_AGENT,
@@ -20,8 +25,7 @@ def download_file(model_id: int, output_path: str, token: str):
         def http_response(self, request, response):
             return response
         https_response = http_response
-        
-    url=urljoin(base=base_url, url=model_id, allow_fragments=True)
+    
     request = urllib.request.Request(url, headers=headers)
     opener = urllib.request.build_opener(NoRedirection)
     response = opener.open(request)
@@ -91,4 +95,3 @@ def download_file(model_id: int, output_path: str, token: str):
     sys.stdout.write('\n')
     print(f'Download completed. File saved as: {filename}')
     print(f'Downloaded in {time_str}')
-
