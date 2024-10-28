@@ -15,7 +15,7 @@ setuptools.setup(
     project_urls={
         "Bug Tracker": "https://github.com/bean980310/civitai-downloader/issues",
     },
-    packages=setuptools.find_packages(where="civitai_downloader"),
+    packages=setuptools.find_packages(),
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
