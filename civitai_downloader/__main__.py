@@ -1,8 +1,4 @@
-from download.download import download_file, civitai_download, url_download
-from token.token import get_token, store_token, prompt_for_civitai_token
+from main import main
 
 if __name__=='__main__':
-    token = get_token()
-
-    if token is None:
-        token = prompt_for_civitai_token()
+    main()
