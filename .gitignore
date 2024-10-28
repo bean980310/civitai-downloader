@@ -1,1 +1,3 @@
 .DS_Store
+civitai_downloader.egg-info
+civitai_downloader/*/__pycache__
