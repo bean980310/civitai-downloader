@@ -25,7 +25,7 @@ from civitai_downloader.download.download import download_file, civitai_download
 token=get_token()
 
 # example
-download_file(url="https://civitai.com/api/download/models/90854", output_path="./models/checkpoints/sd15", token=token)
+url_download(url="https://civitai.com/api/download/models/90854", local_dir="./models/checkpoints/sd15", token=token)
 
 # or
 civitai_download(model_id=90854, local_dir="./models/checkpoints/sd15", token=token)
