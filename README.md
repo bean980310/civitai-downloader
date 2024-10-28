@@ -1,1 +1,1 @@
-# civitai-model-downloader
+# civitai-downloader
