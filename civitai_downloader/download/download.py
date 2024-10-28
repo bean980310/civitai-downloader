@@ -14,6 +14,10 @@ def civitai_download(model_id: int, local_dir: str, token: str):
     download_file(url, local_dir, token)
     return url, local_dir, token
 
+def url_download(url: str, local_dir: str, token: str):
+    download_file(url, local_dir, token)
+    return url, local_dir, token
+
 def download_file(url: str, output_path: str, token: str):
     headers = {
         'Authorization': f'Bearer {token}',
