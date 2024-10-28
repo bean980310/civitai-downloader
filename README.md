@@ -1,1 +1,31 @@
 # civitai-downloader
+
+## How to Use
+
+First, Install civitai-downloader
+
+```bash
+pip3 install git+https://github.com/bean980310/civitai-downloader.git
+```
+
+and, Insert your Access token
+
+```python
+from civitai_downloader.token.token import prompt_for_civitai_token
+
+prompt_for_civitai_token()
+```
+
+Next, Download a model
+
+```python
+from civitai_downloader.token.token import get_token
+from civitai_downloader.download.download import download_file
+
+token=get_token()
+
+# example
+(url="https://civitai.com/api/download/models/90854", output_path="./models/checkpoints/sd15", token=token)
+```
+
+It's Done!
