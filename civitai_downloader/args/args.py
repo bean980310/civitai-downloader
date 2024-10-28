@@ -4,6 +4,13 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='CivitAI Downloader',
     )
+
+    parser.add_argument(
+        '--help',
+        default=True,
+        action='help'
+    )
+
     group = parser.add_mutually_exclusive_group(required=True)
 
     group.add_argument(
