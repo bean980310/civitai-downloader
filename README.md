@@ -31,4 +31,9 @@ download_file(url="https://civitai.com/api/download/models/90854", output_path="
 civitai_download(model_id=90854, local_dir="./models/checkpoints/sd15", token=token)
 ```
 
-It's Done!
+Also, you can use to civitai-downloader command line
+
+```bash
+# example
+civitai-downloader 90854 ./models/checkpoints/sd15
+```
