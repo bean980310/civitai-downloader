@@ -1,9 +1,11 @@
 from civitai_downloader.download.download import civitai_download, url_download
 from civitai_downloader.token.token import get_token, prompt_for_civitai_token
 from civitai_downloader.args.args import get_args
+import argparse
 
 def main():
     args=get_args()
+
     if args.model_id:
         src=args.model_id
     else:
@@ -19,6 +21,8 @@ def main():
             civitai_download(model_id=src,local_dir=local_dir,token=token)
         else:
             url_download(url=src,local_dir=local_dir,token=token)
+    except argparse.ArgumentError:
+        args.help
     except Exception as e:
         print(e)
 

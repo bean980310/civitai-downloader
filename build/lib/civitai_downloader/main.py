@@ -4,6 +4,11 @@ from civitai_downloader.args.args import get_args
 
 def main():
     args=get_args()
+
+    if not args:
+        args.help()
+        exit()
+
     if args.model_id:
         src=args.model_id
     else:
