@@ -1,4 +1,5 @@
 # civitai-downloader
+Model Downloader Package and CLI for CivitAI.
 
 ## How to Use
 
