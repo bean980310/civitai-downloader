@@ -96,48 +96,44 @@ def download_file(url: str, output_path: str, token: str):
         is_notebook = in_jupyter_notebook() and widgets
 
         if is_notebook:
+            file_label=widgets.HTML(value=f'<b>Downloading</b> {filename}')
             progress_bar=widgets.IntProgress(
                 value=0,
                 min=0,
                 max=total_size if total_size > 0 else 1,
-                description=filename,
                 bar_style='info',
-                orientatiion='horizontal'
+                orientatiion='horizontal',
+                layout=widgets.Layout(width='100$')
             )
-            progress_label=widgets.Label('0 bytes')
-            progress_box=widgets.VBox([progress_bar, progress_label])
+            status_label=widgets.Label(value="0%")
+            progress_box=widgets.VBox([file_label, progress_bar, status_label])
             display(progress_box)
         elif tqdm:
-            progress_bar=tqdm(total=total_size, unit='B', unit_scale=True, desc=filename)
+            progress_bar=tqdm(total=total_size, unit='B', unit_scale=True, desc=filename, ncols=100)
         else:
             progress_bar=None
 
         with open(output_file, 'wb') as f:
             while True:
-                elapsed_time = time.time() - start_time
-                if elapsed_time > 0:
-                    speed = downloaded / elapsed_time
-                    speed_str=f'{speed/(1024**2):.2f} MB/s'
-                else:
-                    speed_str='0.00 MB/s'
-
                 buffer = response.read(CHUNK_SIZE)
                 if not buffer:
                     break
 
                 f.write(buffer)
                 downloaded += len(buffer)
+
                 if progress_bar:
                     if is_notebook:
                         if total_size > 0:
                             progress_bar.value = downloaded
                             progress_percentage = (downloaded / total_size)*100
-                            progress_bar.description=f'{filename}... {progress_percentage:.2f}% - {speed_str}'
-                            progress_label.value=f'{downloaded} / {total_size} bytes'
+                            elapsed_time = time.time() - start_time
+                            speed = downloaded / elapsed_time if elapsed_time > 0 else 0
+                            speed_str=f'{speed/(1024**2):.2f} MB/s'
+                            status_label.value=f"{progress_percentage:.2f}% ({speed_str}"
                         else:
                             progress_bar.value=1
-                            progress_bar.description=f'{filename}... Downloading'
-                            progress_label.value=f'{downloaded} bytes'
+                            status_label.value=f'{downloaded} bytes'
                     elif tqdm:
                         progress_bar.update(len(buffer))
         
@@ -156,8 +152,7 @@ def download_file(url: str, output_path: str, token: str):
         if progress_bar:
             if is_notebook:
                 progress_bar.bar_style='success'
-                progress_bar.description=f'{filename}... Downloaded'
-                progress_label.value=f'{downloaded} / {total_size} bytes ({time_str})'
+                status_label.value=f'Downloaded ({time_str})'
             elif tqdm:
                 progress_bar.close()
         
