@@ -47,5 +47,11 @@ Also, you can use to civitai-downloader command line
 
 ```bash
 # example
-civitai-downloader 90854 ./models/checkpoints/sd15
+civitai-downloader-cli download 90854
+
+# prefix local dir
+civitai-downloader-cli download 90854 --local-dir ./models/checkpoints/sd15
+
+# to use url
+civitai-downloader-cli url-download https://civitai.com/api/download/models/90854
 ```
