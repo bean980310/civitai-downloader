@@ -1,3 +1,4 @@
+from getpass import getpass
 from pathlib import Path
 import threading
 
@@ -61,6 +62,9 @@ def prompt_for_civitai_token():
         token_event.wait()
         return token
     else:
-        token = input('Please enter your CivitAI API token: ')
+        try:
+            token = getpass('Please enter your CivitAI API token: ')
+        except Exception as e:
+            token = input('Please enter your CivitAI API token: ')
         store_token(token)
         return token

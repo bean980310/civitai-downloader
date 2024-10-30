@@ -21,3 +21,7 @@ def url_download_cmd(model_url: str=typer.Argument(..., help="Model URL"),
                       local_dir: str=typer.Option(".", help="Output path")):
     url_download(url=model_url, local_dir=local_dir, token=get_token())
     return model_url, local_dir
+
+@civitai_downloader_cli.command("token", help="Store CivitAI API token")
+def token_cmd():
+    prompt_for_civitai_token()
