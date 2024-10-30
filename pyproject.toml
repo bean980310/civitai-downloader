@@ -1,19 +1,16 @@
 [build-system]
 requires=[
     "setuptools>=42",
-    "wheel"
+    "wheel",
+    "build"
 ]
 build-backend="setuptools.build_meta"
 
 [project]
 name="civitai-downloader"
-version="0.3.6"
-dependencies=[
-    "requests",
-    "tqdm",
-    "ipywidgets"
-]
-requires-python=">=3.6"
+version="0.3.9"
+
+requires-python=">=3.8, <3.13"
 authors=[
     {name="Hyunbeen Chang", email="bean980310@gmail.com"}
 ]
@@ -23,11 +20,16 @@ maintainers=[
 description="A package to download models from CivitAI"
 readme="README.md"
 license={file="LICENSE"}
+keywords=["civitai"]
 classifiers=[
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: OS Independent",
 ]
+dynamic=["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies={file=["requirements.txt"]}
 
 [project.urls]
 Repository = "https://github.com/bean980310/civitai-downloader"
@@ -35,4 +37,4 @@ Repository = "https://github.com/bean980310/civitai-downloader"
 Changelog = "https://github.com/bean980310/civitai-downloader/blob/master/CHANGELOG.md"
 
 [project.scripts]
-civitai-downloader="civitai_downloader.cli:main"
+civitai-downloader-cli="civitai_downloader.__main__:main"

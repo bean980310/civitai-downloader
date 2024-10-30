@@ -4,6 +4,7 @@ import time
 import urllib.request
 import threading
 from urllib.parse import urlparse, parse_qs, unquote, urljoin
+from civitai_downloader.download.format import format_bytes, format_time
 
 try:
     from tqdm import tqdm
@@ -29,26 +30,6 @@ def in_jupyter_notebook():
     except:
         pass
     return False
-
-def format_bytes(size):
-    power=1024
-    n=0
-    power_labels=['Bytes', 'KB', 'MB', 'GB', 'TB']
-    while size >= power and n < len(power_labels)-1:
-        size/=power
-        n+=1
-    return f'{size:.2f} {power_labels[n]}'
-
-def format_time(seconds):
-    hours, remainder=divmod(seconds, 3600)
-    minutes, seconds=divmod(remainder, 60)
-    time_str=''
-    if hours>0:
-        time_str+=f'{int(hours)}h '
-    if minutes>0:
-        time_str+=f'{int(minutes)}m '
-    time_str+=f'{int(seconds)}s'
-    return time_str.strip()
 
 def civitai_download(model_id: int, local_dir: str, token: str):
     url = urljoin(base_url, str(model_id))
@@ -132,7 +113,9 @@ def download_file(url: str, output_path: str, token: str):
             progress_box=widgets.VBox([file_label, progress_info])
             display(progress_box)
         elif tqdm:
-            progress_bar=tqdm(total=total_size, unit='B', unit_scale=True, desc=filename, ncols=100)
+            print(f"downloading: {filename}")
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}] {postfix}"
+            progress_bar=tqdm(total=total_size, unit='B', unit_scale=True, ncols=None, bar_format=bar_format)
         else:
             progress_bar=None
 
@@ -168,6 +151,31 @@ def download_file(url: str, output_path: str, token: str):
                             status_label.value=f'Downloaded: {downloaded_str}<br>Elapsed Time: {elapsed_time_str}'
                     elif tqdm:
                         progress_bar.update(len(buffer))
+                        speed=downloaded/(time.time()-start_time) if time.time()-start_time > 0 else 0
+                        speed_str=f'{speed/(1024**2):.2f} MB/s'
+                        if total_size>0:
+                            progress_percentage=(downloaded/total_size)*100
+                            progress_bar.set_postfix({
+                                'percent': f'{progress_percentage:.2f}%',
+                                'speed': speed_str
+                                })
+                        else:
+                            progress_bar.set_postfix({
+                                'downloaded': format_bytes(downloaded),
+                                'speed': speed_str
+                                })
+                else:
+                    elapsed_time=time.time()-start_time
+                    speed=downloaded/elapsed_time if elapsed_time>0 else 0
+                    speed_str=f"{speed/(1024**2):.2f} MB/s"
+                    if total_size>0:
+                        progress_percentage=(downloaded/total_size)*100
+                        downloaded_str = format_bytes(downloaded)
+                        sys.stdout.write(f"\r{filename} - {progress_percentage:.2f}% ({downloaded_str} / {total_size_str}, {speed_str})")
+                    else:
+                        downloaded_str=format_bytes(downloaded)
+                        sys.stdout.write(f"\r{filename} - Downloaded: {downloaded_str}, Speed: ({speed_str})")
+                    sys.stdout.flush()
         
         end_time = time.time()
         time_taken = end_time - start_time
@@ -179,9 +187,9 @@ def download_file(url: str, output_path: str, token: str):
                 status_label.value=f'<b>Downloaded</b> (Total Time: {time_str})'
             elif tqdm:
                 progress_bar.close()
-        
-        print(f'\nDownload completed. File saved as: {filename}')
-        print(f'Downloaded in {time_str}')
+        else:
+            sys.stdout.write(f'\nDownload completed. File saved as: {filename}\n')
+            sys.stdout.write(f'Downloaded in {time_str}\n')
 
     except Exception as e:
         print(f'Error: {e}')
@@ -189,5 +197,7 @@ def download_file(url: str, output_path: str, token: str):
             if is_notebook:
                 progress_bar.bar_style='danger'
                 progress_bar.description='Error'
-        elif tqdm:
-            progress_bar.close()
+            elif tqdm:
+                progress_bar.close()
+        else:
+            sys.stdout.write('\n')
