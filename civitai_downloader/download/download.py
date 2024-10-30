@@ -93,12 +93,14 @@ def download_file(url: str, output_path: str, token: str):
         downloaded = 0
         start_time = time.time()
 
-        if in_jupyter_notebook() and widgets:
+        is_notebook = in_jupyter_notebook() and widgets
+
+        if is_notebook:
             progress_bar=widgets.IntProgress(
                 value=0,
                 min=0,
-                max=total_size,
-                description='Downloading:',
+                max=total_size if total_size > 0 else 1,
+                description=filename,
                 bar_style='info',
                 orientatiion='horizontal'
             )
@@ -126,15 +128,15 @@ def download_file(url: str, output_path: str, token: str):
                 f.write(buffer)
                 downloaded += len(buffer)
                 if progress_bar:
-                    if in_jupyter_notebook() and widgets:
+                    if is_notebook:
                         if total_size > 0:
                             progress_bar.value = downloaded
                             progress_percentage = (downloaded / total_size)*100
-                            progress_bar.description=f'{progress_percentage:.2f}% - {speed_str}'
+                            progress_bar.description=f'{filename}... {progress_percentage:.2f}% - {speed_str}'
                             progress_label.value=f'{downloaded} / {total_size} bytes'
                         else:
                             progress_bar.value=1
-                            progress_bar.description=f'Downloaded Bytes: {downloaded:.2f} bytes'
+                            progress_bar.description=f'{filename}... Downloading'
                             progress_label.value=f'{downloaded} bytes'
                     elif tqdm:
                         progress_bar.update(len(buffer))
@@ -152,9 +154,9 @@ def download_file(url: str, output_path: str, token: str):
             time_str = f'{int(seconds)}s'
 
         if progress_bar:
-            if in_jupyter_notebook() and widgets:
+            if is_notebook:
                 progress_bar.bar_style='success'
-                progress_bar.description='Done'
+                progress_bar.description=f'{filename}... Downloaded'
                 progress_label.value=f'{downloaded} / {total_size} bytes ({time_str})'
             elif tqdm:
                 progress_bar.close()
@@ -164,8 +166,9 @@ def download_file(url: str, output_path: str, token: str):
 
     except Exception as e:
         print(f'Error: {e}')
-        if progress_bar and in_jupyter_notebook() and widgets:
-            progress_bar.bar_style='danger'
-            progress_bar.description='Error'
-        elif progress_bar and tqdm:
+        if progress_bar:
+            if is_notebook:
+                progress_bar.bar_style='danger'
+                progress_bar.description='Error'
+        elif tqdm:
             progress_bar.close()
