@@ -6,3 +6,4 @@ argparse
 urllib3
 civitai-py
 civitai
+typer
