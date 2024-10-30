@@ -8,7 +8,16 @@ It is recommanded on Amazon Web Services, Microsoft Azure, Google Cloud Platform
 First, Install civitai-downloader
 
 ```bash
+# Install from PyPI
+pip3 install civitai-downloader
+
+# Install from GitHub
 pip3 install git+https://github.com/bean980310/civitai-downloader.git
+
+# Install from Source
+git clone https://github.com/bean980310/civitai-downloader.git
+cd civitai-downloader
+pip3 install -e .
 ```
 
 and, Insert your Access token
