@@ -1,11 +1,11 @@
-# civitai-downloader
+# civitai-model-downloader
 Model Downloader Package and CLI for CivitAI.
 
 It is recommanded on Amazon Web Services, Microsoft Azure, Google Cloud Platform.
 
 ## How to Use
 
-First, Install civitai-downloader
+First, Install civitai-model-downloader
 
 ```bash
 # Install from PyPI
