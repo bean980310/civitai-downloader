@@ -39,6 +39,17 @@ def format_bytes(size):
         n+=1
     return f'{size:.2f} {power_labels[n]}'
 
+def format_time(seconds):
+    hours, remainder=divmod(seconds, 3600)
+    minutes, seconds=divmod(remainder, 60)
+    time_str=''
+    if hours>0:
+        time_str+=f'{int(hours)}h '
+    if minutes>0:
+        time_str+=f'{int(minutes)}m '
+    time_str+=f'{int(seconds)}s'
+    return time_str.strip()
+
 def civitai_download(model_id: int, local_dir: str, token: str):
     url = urljoin(base_url, str(model_id))
     start_download_thread(url, local_dir, token)
@@ -143,30 +154,31 @@ def download_file(url: str, output_path: str, token: str):
                             speed = downloaded / elapsed_time if elapsed_time > 0 else 0
                             speed_str=f'{speed/(1024**2):.2f} MB/s'
                             downloaded_str=format_bytes(downloaded)
-                            status_label.value=f"<b>{progress_percentage:.2f}%</b> ({downloaded_str} / {total_size_str}, {speed_str})"
+                            elapsed_time_str=format_time(elapsed_time)
+                            remaining_time = (total_size - downloaded) / speed if speed > 0 else 0
+                            remaining_time_str=format_time(remaining_time)
+                            status_label.value=(
+                                f"<b>{progress_percentage:.2f}%</b> "
+                                f"({downloaded_str}/{total_size_str}, {speed_str})<br>"
+                                f"({elapsed_time_str}<{remaining_time_str})"
+                                )
                         else:
                             progress_bar.value=1
                             downloaded_str=format_bytes(downloaded)
-                            status_label.value=f'Downloaded: {downloaded_str}'
+                            elapsed_time=time.time()-start_time
+                            elapsed_time_str=format_time(elapsed_time)
+                            status_label.value=f'Downloaded: {downloaded_str}<br>Elapsed Time: {elapsed_time_str}'
                     elif tqdm:
                         progress_bar.update(len(buffer))
         
         end_time = time.time()
         time_taken = end_time - start_time
-        hours, remainder = divmod(time_taken, 3600)
-        minutes, seconds = divmod(remainder, 60)
-
-        if hours > 0:
-            time_str = f'{int(hours)}h {int(minutes)}m {int(seconds)}s'
-        elif minutes > 0:
-            time_str = f'{int(minutes)}m {int(seconds)}s'
-        else:
-            time_str = f'{int(seconds)}s'
+        time_str=format_time(time_taken)
 
         if progress_bar:
             if is_notebook:
                 progress_bar.bar_style='success'
-                status_label.value=f'<b>Downloaded</b> ({time_str})'
+                status_label.value=f'<b>Downloaded</b> (Total Time: {time_str})'
             elif tqdm:
                 progress_bar.close()
         
