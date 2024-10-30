@@ -30,6 +30,15 @@ def in_jupyter_notebook():
         pass
     return False
 
+def format_bytes(size):
+    power=1024
+    n=0
+    power_labels=['Bytes', 'KB', 'MB', 'GB', 'TB']
+    while size >= power and n < len(power_labels)-1:
+        size/=power
+        n+=1
+    return f'{size:.2f} {power_labels[n]}'
+
 def civitai_download(model_id: int, local_dir: str, token: str):
     url = urljoin(base_url, str(model_id))
     start_download_thread(url, local_dir, token)
@@ -84,8 +93,10 @@ def download_file(url: str, output_path: str, token: str):
         total_size = response.getheader('Content-Length')
         if total_size is not None:
             total_size = int(total_size)
+            total_size_str=format_bytes(total_size)
         else:
             total_size=0
+            total_size_str='Unknown'
 
         output_file = os.path.join(output_path, filename)
         os.makedirs(output_path, exist_ok=True)
@@ -103,10 +114,11 @@ def download_file(url: str, output_path: str, token: str):
                 max=total_size if total_size > 0 else 1,
                 bar_style='info',
                 orientatiion='horizontal',
-                layout=widgets.Layout(width='100$')
+                layout=widgets.Layout(width='100')
             )
-            status_label=widgets.Label(value="0%")
-            progress_box=widgets.VBox([file_label, progress_bar, status_label])
+            status_label=widgets.HTML(value="0%")
+            progress_info=widgets.HBox([progress_bar, status_label])
+            progress_box=widgets.VBox([file_label, progress_info])
             display(progress_box)
         elif tqdm:
             progress_bar=tqdm(total=total_size, unit='B', unit_scale=True, desc=filename, ncols=100)
@@ -130,10 +142,12 @@ def download_file(url: str, output_path: str, token: str):
                             elapsed_time = time.time() - start_time
                             speed = downloaded / elapsed_time if elapsed_time > 0 else 0
                             speed_str=f'{speed/(1024**2):.2f} MB/s'
-                            status_label.value=f"{progress_percentage:.2f}% ({speed_str}"
+                            downloaded_str=format_bytes(downloaded)
+                            status_label.value=f"<b>{progress_percentage:.2f}%</b> ({downloaded_str} / {total_size_str}, {speed_str})"
                         else:
                             progress_bar.value=1
-                            status_label.value=f'{downloaded} bytes'
+                            downloaded_str=format_bytes(downloaded)
+                            status_label.value=f'Downloaded: {downloaded_str}'
                     elif tqdm:
                         progress_bar.update(len(buffer))
         
@@ -152,11 +166,11 @@ def download_file(url: str, output_path: str, token: str):
         if progress_bar:
             if is_notebook:
                 progress_bar.bar_style='success'
-                status_label.value=f'Downloaded ({time_str})'
+                status_label.value=f'<b>Downloaded</b> ({time_str})'
             elif tqdm:
                 progress_bar.close()
         
-        print(f'Download completed. File saved as: {filename}')
+        print(f'\nDownload completed. File saved as: {filename}')
         print(f'Downloaded in {time_str}')
 
     except Exception as e:
