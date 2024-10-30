@@ -158,8 +158,8 @@ def download_file(url: str, output_path: str, token: str):
                             remaining_time = (total_size - downloaded) / speed if speed > 0 else 0
                             remaining_time_str=format_time(remaining_time)
                             status_label.value=(
-                                f"<b>{progress_percentage:.2f}%</b> "
-                                f"({downloaded_str}/{total_size_str}, {speed_str}, {elapsed_time_str}<{remaining_time_str})")
+                                f"<b>{progress_percentage:.2f}%</b> ({downloaded_str}/{total_size_str}) "
+                                f"[{speed_str}, {elapsed_time_str}<{remaining_time_str}]")
                         else:
                             progress_bar.value=1
                             downloaded_str=format_bytes(downloaded)
