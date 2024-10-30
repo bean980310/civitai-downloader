@@ -3,6 +3,7 @@ build/
 .DS_Store
 dist/
 civitai_downloader.egg-info/
+civitai_model_downloader.egg-info/
 civitai_downloader/*/__pycache__/
 civitai_downloader/__pycache__/
 *.safetensors
