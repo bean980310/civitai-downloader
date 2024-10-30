@@ -2,6 +2,8 @@ import os.path
 import sys
 import time
 import urllib.request
+import requests
+from tqdm import tqdm
 from urllib.parse import urlparse, parse_qs, unquote, urljoin
 
 CHUNK_SIZE = 1638400
@@ -60,6 +62,9 @@ def download_file(url: str, output_path: str, token: str):
 
     output_file = os.path.join(output_path, filename)
 
+    prograss_bar=tqdm(total=total_size, unit='B', unit_scale=True, desc=filename)
+
+
     with open(output_file, 'wb') as f:
         downloaded = 0
         start_time = time.time()
@@ -73,6 +78,7 @@ def download_file(url: str, output_path: str, token: str):
                 break
 
             downloaded += len(buffer)
+            prograss_bar.update(len(buffer))
             f.write(buffer)
             chunk_time = chunk_end_time - chunk_start_time
 
@@ -83,7 +89,8 @@ def download_file(url: str, output_path: str, token: str):
                 progress = downloaded / total_size
                 sys.stdout.write(f'\rDownloading: {filename} [{progress*100:.2f}%] - {speed:.2f} MB/s')
                 sys.stdout.flush()
-
+    
+    prograss_bar.close()
     end_time = time.time()
     time_taken = end_time - start_time
     hours, remainder = divmod(time_taken, 3600)

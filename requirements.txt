@@ -1,2 +1,4 @@
 setuptools>=42
 wheel
+requests
+tqdm
