@@ -30,6 +30,8 @@ setuptools.setup(
     },
     install_requires=[
         'tqdm',
-        'urllib3'
+        'urllib3',
+        'ipywidgets',
+        'requests'
     ]
 )
