@@ -9,7 +9,7 @@ First, Install civitai-downloader
 
 ```bash
 # Install from PyPI
-pip3 install civitai-downloader
+pip3 install civitai-model-downloader
 
 # Install from GitHub
 pip3 install git+https://github.com/bean980310/civitai-downloader.git

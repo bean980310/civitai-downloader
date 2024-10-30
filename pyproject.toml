@@ -7,7 +7,7 @@ requires=[
 build-backend="setuptools.build_meta"
 
 [project]
-name="civitai-downloader"
+name="civitai-model-downloader"
 version="0.3.9"
 
 requires-python=">=3.8, <3.13"
