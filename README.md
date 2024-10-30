@@ -1,5 +1,5 @@
-# civitai-model-downloader
-Model Downloader Package and CLI for CivitAI.
+# Model Downloader for CivitAI
+Model Downloader Package for Python Developer and CLI for CivitAI.
 
 It is recommanded on Amazon Web Services, Microsoft Azure, Google Cloud Platform.
 
