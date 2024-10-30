@@ -1,0 +1,2 @@
+[console_scripts]
+civitai-downloader = civitai_downloader.cli:main
