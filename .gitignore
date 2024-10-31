@@ -1,5 +1,6 @@
 __pycache__/
 build/
+dist/
 .DS_Store
 civitai_downloader.egg-info/
 civitai_model_downloader.egg-info/
