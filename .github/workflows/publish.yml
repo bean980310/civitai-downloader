@@ -30,5 +30,9 @@ jobs:
       - name: Build and publish package
         run: |
           python -m build
+      - name: Upload to PyPI
+        run: |
           python -m twine check dist/*
           python -m twine upload --repository pypi dist/*
+        with:
+          password: ${{secrets.PYPI_API_TOKEN }}
