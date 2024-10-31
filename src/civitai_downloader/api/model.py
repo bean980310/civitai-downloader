@@ -13,7 +13,7 @@ def get_model_info_from_api(
     if response.status_code==200:
         data=response.json()
         model_name=data.get('name')
-        model_desc=data.get('description') if include_desc else None
+        model_desc=data.get('description') if include_desc else ''
         model_type=data.get('type')
         model_poi=data.get('poi')
         model_is_nsfw=data.get('nsfw')
@@ -29,10 +29,17 @@ def get_model_info_from_api(
         model_creator_name=data.get('creator').get('username')
         model_creator_image=data.get('creator').get('image')
         model_tags=[data.get('tags')[i] for i in range(len(data.get('tags')))]
-        model_version_id=[data.get('modelVersions')[i].get('id') for i in range(len(data.get('modelVersions')))]
-        model_version_name=[data.get('modelVersions')[i].get('name') for i in range(len(data.get('modelVersions')))]
-        model_version_url=[data.get('modelVersions')[i].get('downloadUrl') for i in range(len(data.get('modelVersions')))]
-        return model_id, model_name, model_desc, model_type, model_poi, model_is_nsfw, model_allow_no_credit, model_allow_commercial_use, model_stats, model_creator_name, model_creator_image, model_tags, model_version_id, model_version_name, model_version_url
+        model_version=[{
+            'id': data.get('modelVersions')[i].get('id'),
+            'name': data.get('modelVersions')[i].get('name'),
+            'createdAt': data.get('modelVersions')[i].get('createdAt'),
+            'updatedAt': data.get('modelVersions')[i].get('updatedAt'),
+            'trainedWords': [data.get('modelVersions')[i].get('trainedWords')[j] for j in range(len(data.get('modelVersions')[i].get('trainedWords')))],
+            'baseModel': data.get('modelVersions')[i].get('baseModel'),
+            'description': data.get('modelVersions')[i].get('description') if include_desc else '',
+            'downloadUrl': data.get('modelVersions')[i].get('downloadUrl')
+        } for i in range(len(data.get('modelVersions')))]
+        return model_id, model_name, model_desc, model_type, model_poi, model_is_nsfw, model_allow_no_credit, model_allow_commercial_use, model_stats, model_creator_name, model_creator_image, model_tags, model_version
     else:
         error_code=f'{response.status_code} : {response.text}'
         return error_code
