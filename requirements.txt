@@ -2,7 +2,6 @@ requests
 tqdm
 ipywidgets
 appdirs
-argparse
 urllib3
 civitai-py
 civitai
