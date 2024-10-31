@@ -61,12 +61,13 @@ def get_model_version_info_from_api(
         model_created=data.get('createdAt')
         model_updated=data.get('updatedAt')
         model_trained_words=[data.get('trainedWords')[i] for i in range(len(data.get('trainedWords')))]
-        model_version_desc=data.get('description')
         base_model=data.get('baseModel')
+        model_version_desc=data.get('description')
         model_version_files_name=[data.get('files')[i].get('name') for i in range(len(data.get('files')))]
-        model_version_files_url=[data.get('files')[i].get('url') for i in range(len(data.get('files')))]
+        model_version_files_url=[data.get('files')[i].get('downloadUrl') for i in range(len(data.get('files')))]
         model_version_images_url=[data.get('images')[i].get('url') for i in range(len(data.get('images')))]
-        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc
+        model_version_download_url=data.get('downloadUrl')
+        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc, model_version_files_name, model_version_files_url, model_version_images_url, model_version_download_url
     else:
         error_code=f'{response.status_code} : {response.text}'
         return error_code
