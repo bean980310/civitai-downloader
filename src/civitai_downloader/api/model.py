@@ -15,14 +15,24 @@ def get_model_info_from_api(
         model_name=data.get('name')
         model_desc=data.get('description') if include_desc else None
         model_type=data.get('type')
+        model_poi=data.get('poi')
         model_is_nsfw=data.get('nsfw')
-        model_tags=[data.get('tags')[i] for i in range(len(data.get('tags')))]
-        model_mode=data.get('mode')
+        model_allow_no_credit=data.get('allowNoCredit')
+        model_allow_commercial_use=data.get('allowCommercialUse')
+        model_stats={
+            'downloadCount': data.get('stats').get('downloadCount'),
+            'favoriteCount': data.get('stats').get('favoriteCount'),
+            'commentCount': data.get('stats').get('commentCount'),
+            'ratingCount': data.get('stats').get('ratingCount'),
+            'rating': data.get('stats').get('rating')
+        }
         model_creator_name=data.get('creator').get('username')
+        model_creator_image=data.get('creator').get('image')
+        model_tags=[data.get('tags')[i] for i in range(len(data.get('tags')))]
         model_version_id=[data.get('modelVersions')[i].get('id') for i in range(len(data.get('modelVersions')))]
         model_version_name=[data.get('modelVersions')[i].get('name') for i in range(len(data.get('modelVersions')))]
         model_version_url=[data.get('modelVersions')[i].get('downloadUrl') for i in range(len(data.get('modelVersions')))]
-        return model_id, model_name, model_desc, model_type, model_is_nsfw, model_tags, model_mode, model_creator_name, model_version_id, model_version_name, model_version_url
+        return model_id, model_name, model_desc, model_type, model_poi, model_is_nsfw, model_allow_no_credit, model_allow_commercial_use, model_stats, model_creator_name, model_creator_image, model_tags, model_version_id, model_version_name, model_version_url
     else:
         error_code=f'{response.status_code} : {response.text}'
         return error_code
