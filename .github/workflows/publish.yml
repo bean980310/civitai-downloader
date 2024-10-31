@@ -33,6 +33,7 @@ jobs:
       - name: Upload to PyPI
         run: |
           python -m twine check dist/*
-          python -m twine upload --repository pypi dist/*
-        with:
-          password: ${{secrets.PYPI_API_TOKEN }}
+          python -m twine upload dist/*
+        env:
+          TWINE_USERNAME: ${{secrets.PYPI_USERNAME}}
+          TWINE_PASSWORD: ${{secrets.PYPI_API_TOKEN}}
