@@ -1,0 +1,5 @@
+from api.test_model import test_get_model_info_from_api
+from api.test_creators import test_get_creators_info_from_api
+
+test_get_model_info_from_api()
+test_get_creators_info_from_api()

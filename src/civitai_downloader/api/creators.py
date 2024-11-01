@@ -2,14 +2,14 @@ import requests
 from civitai_downloader.api import CIVITAI_API_URL
 from typing import Optional
 
-def get_creators_info_from_api(limit: Optional[int], page: Optional[int], query: Optional[str], include_metadata: Optional[bool], api_token: Optional[str]):
+def get_creators_info_from_api(limit: Optional[int]=20, page: Optional[int]=1, query: Optional[str]=None, include_metadata: Optional[bool]=False, api_token: Optional[str]=None):
     api_url=f'{CIVITAI_API_URL}/creators'
     headers={}
     headers['Authorization']=f'Bearer {api_token}' if api_token else None
     params={}
-    params['limit']=limit if limit else 20
-    params['page']=page if page else 1
-    params['query']=query if query else None
+    params['limit']=limit
+    params['page']=page
+    params['query']=query
     response=requests.get(api_url, headers=headers, params=params)
     if response.status_code==200:
         data=response.json()
