@@ -6,6 +6,8 @@ requires=[
 ]
 build-backend="setuptools.build_meta"
 
+[tool.mypy]
+
 [project]
 name="civitai-model-downloader"
 version="0.3.12"
