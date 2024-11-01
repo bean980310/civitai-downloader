@@ -1,18 +1,18 @@
-from civitai_downloader.api.model import get_model_info_from_api, get_model_version_info_from_api
+from civitai_downloader.api.model import get_model_info_simple_from_api, get_model_version_info_simple_from_api
 
 def test_get_model_info_from_api():
-    model_info = get_model_info_from_api(9409)
+    model_info = get_model_info_simple_from_api(9409)
     assert model_info[0] == 9409
     assert model_info[1] == '万象熔炉 | Anything XL'
-    assert model_info[3] == "Checkpoint"
+    assert model_info[2] == "Checkpoint"
+    assert model_info[3] == False
     assert model_info[4] == False
-    assert model_info[5] == False
-    assert model_info[6] == True
-    assert model_info[7] == ['Image', 'RentCivit', 'Rent', 'Sell']
-    assert model_info[9] == 'Yuno779'
+    assert model_info[5] == True
+    assert model_info[6] == ['Image', 'RentCivit', 'Rent', 'Sell']
+    assert model_info[8] == 'Yuno779'
 
 def test_get_model_version_info_from_api():
-    model_version_info=get_model_version_info_from_api(384264)
+    model_version_info=get_model_version_info_simple_from_api(384264)
     assert model_version_info[0] == 384264
     assert model_version_info[1] == 9409
     assert model_version_info[2] == 'XL'
