@@ -7,14 +7,23 @@ from civitai_downloader.api.model import get_model_info_from_api, get_model_vers
 base_url='https://civitai.com/api/download/models/'
     
 def civitai_download(model_id: int, local_dir: str, token: str):
-    url = urljoin(base_url, str(model_id))
-    start_download_thread(url, local_dir, token)
-    return url, local_dir, token
+    model_version_info=get_model_version_info_from_api(model_id, token)
+    if model_version_info:
+        url=model_version_info.get('downloadUrl')
+        start_download_thread(url, local_dir, token)
+        return url, local_dir, token
 
-def advanced_download(model_id: int, version_id: int, local_dir: str, token: str, format: enumerate, size: enumerate, fp: enumerate, type: Optional[enumerate]='Model'):
-    url=f'{base_url}{model_id}/{version_id}?type={type}&format={format}&size={size}&fp={fp}'
-    start_download_thread(url, local_dir, token)
-    return url, local_dir, token
+def advanced_download(model_id: int, local_dir: str, token: str, type: enumerate, format: enumerate, size: enumerate, fp: enumerate):
+    model_version_info=get_model_version_info_from_api(model_id, token)
+    if model_version_info:
+        url=urljoin(base_url, str(model_id))
+        for file in model_version_info.get('files'):
+            if type and file.get('type')==type: url.join(f'?type={type}')
+            if format and file.get('format')==format: url.join(f'?format={format}')
+            if size and file.get('size')==size: url.join(f'?size={size}')
+            if fp and file.get('fp')==fp: url.join(f'?fp={fp}')
+            start_download_thread(url, local_dir, token)
+            return url, local_dir, token
 
 def url_download(url: str, local_dir: str, token: str):
     start_download_thread(url, local_dir, token)
@@ -46,6 +55,7 @@ def get_download_files(model_info, local_dir, token):
             if download_url:
                 start_download_thread(download_url, local_dir, token)
                 download_files.append(download_url)
+                return download_url, local_dir, token
 
 def get_version_download_files(model_version_info, local_dir, token):
     download_files=[]
@@ -54,3 +64,4 @@ def get_version_download_files(model_version_info, local_dir, token):
         if download_url:
             start_download_thread(download_url, local_dir, token)
             download_files.append(download_url)
+            return download_url, local_dir, token
