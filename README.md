@@ -32,7 +32,7 @@ Import Your CivitAI API Token and Next, Download a model
 
 ```python
 from civitai_downloader.token.token import get_token
-from civitai_downloader.download.download import download_file, civitai_download
+from civitai_downloader.download.download import civitai_download, url_download
 
 token=get_token()
 

@@ -15,8 +15,8 @@ def get_creators_info_from_api(limit: Optional[int]=20, page: Optional[int]=1, q
         data=response.json()
         return data
     else:
-        print(f'{response.status_code} : {response.text}')
-        return []
+        error_code=f'{response.status_code} : {response.text}'
+        return error_code
     
 def get_creators_info_simple_from_api(limit: Optional[int]=20, page: Optional[int]=1, query: Optional[str]=None, api_token: Optional[str]=None):
     creators_db=get_creators_info_from_api(limit, page, query, api_token)
