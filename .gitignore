@@ -6,6 +6,7 @@ civitai_downloader.egg-info/
 civitai_model_downloader.egg-info/
 civitai_downloader/*/__pycache__/
 civitai_downloader/__pycache__/
+.pytest_cache/
 *.safetensors
 *.ckpt
 test.ipynb
