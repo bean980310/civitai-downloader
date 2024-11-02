@@ -3,25 +3,31 @@ from typing import Optional
 from urllib.parse import urljoin
 from civitai_downloader.download.backend import download_file
 from civitai_downloader.api.model import get_model_info_from_api, get_model_version_info_from_api
+from urllib import request
 
 base_url='https://civitai.com/api/download/models/'
     
 def civitai_download(model_id: int, local_dir: str, token: str):
     model_version_info=get_model_version_info_from_api(model_id, token)
     if model_version_info:
-        url=model_version_info.get('downloadUrl')
-        start_download_thread(url, local_dir, token)
-        return url, local_dir, token
+        for files in model_version_info.get('files'):
+            url=files.get('downloadUrl')
+            start_download_thread(url, local_dir, token)
+            return url, local_dir, token
 
 def advanced_download(model_id: int, local_dir: str, token: str, type: enumerate, format: enumerate, size: enumerate, fp: enumerate):
     model_version_info=get_model_version_info_from_api(model_id, token)
     if model_version_info:
-        url=urljoin(base_url, str(model_id))
-        for file in model_version_info.get('files'):
-            if type and file.get('type')==type: url.join(f'?type={type}')
-            if format and file.get('format')==format: url.join(f'?format={format}')
-            if size and file.get('size')==size: url.join(f'?size={size}')
-            if fp and file.get('fp')==fp: url.join(f'?fp={fp}')
+        filtered_files=[]
+        for file in model_version_info.get('files', []):
+            if type and file.get('type')==type: file['type']=type
+            metadata=file.get('metadata')
+            if format and metadata.get('format')==format: metadata['format']=format
+            if size and metadata.get('size')==size: metadata['size']=size
+            if fp and metadata.get('fp')==fp: metadata['fp']=fp
+            filtered_files.append(file)
+        for file in filtered_files:
+            url=file.get('downloadUrl')
             start_download_thread(url, local_dir, token)
             return url, local_dir, token
 

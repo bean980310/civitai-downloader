@@ -38,19 +38,23 @@ def get_model_info_simple_from_api(
         model_creator_name=model_info.get('creator').get('username')
         model_creator_image=model_info.get('creator').get('image')
         model_tags=model_info.get('tags')
-        model_version=model_info.get('modelVersions')
-        model_version_info=[{
-            'id': model_version[i].get('id'),
-            'name': model_version[i].get('name'),
-            'createdAt': model_version[i].get('createdAt'),
-            'updatedAt': model_version[i].get('updatedAt'),
-            'trainedWords': model_version[i].get('trainedWords'),
-            'baseModel': model_version[i].get('baseModel'),
-            'description': model_version[i].get('description'),
-            'downloadUrl': model_version[i].get('downloadUrl'),
-            'files.name': [model_version[i].get('files')[j].get('name') for j in range(len(model_version[i].get('files')))],
-            'images.url': [model_version[i].get('images')[j].get('url') for j in range(len(model_version[i].get('images')))]
-        } for i in range(len(model_version))]
+        model_version_info=[]
+        model_versions=model_info.get('modelVersions', [])
+        for model_version in model_versions:
+            info={
+                'id': model_version.get('id'),
+                'name': model_version.get('name'),
+                'createdAt': model_version.get('createdAt'),
+                'updatedAt': model_version.get('updatedAt'),
+                'trainedWords': model_version.get('trainedWords'),
+                'baseModel': model_version.get('baseModel'),
+                'description': model_version.get('description'),
+                'downloadUrl': model_version.get('downloadUrl'),
+                'files.name': [model_version.get('files')[i].get('name') for i in range(len(model_version.get('files')))],
+                'files.downloadUrl': [model_version.get('files')[i].get('downloadUrl') for i in range(len(model_version.get('files')))],
+                'images.url': [model_version.get('images')[i].get('url') for i in range(len(model_version.get('images')))]
+            }
+            model_version_info.append(info)
         return model_id, model_name, model_type, model_poi, model_is_nsfw, model_allow_no_credit, model_allow_commercial_use, model_stats, model_creator_name, model_creator_image, model_tags, model_version_info
     else:
         return None
@@ -79,11 +83,20 @@ def get_model_version_info_simple_from_api(
         model_trained_words=[model_version_info.get('trainedWords')[i] for i in range(len(model_version_info.get('trainedWords')))]
         base_model=model_version_info.get('baseModel')
         model_version_desc=model_version_info.get('description')
-        model_version_files_name=[model_version_info.get('files')[i].get('name') for i in range(len(model_version_info.get('files')))]
-        model_version_files_url=[model_version_info.get('files')[i].get('downloadUrl') for i in range(len(model_version_info.get('files')))]
+        model_version_files_info=[]
+        model_version_images_info=[]
+        files=model_version_info.get('files', [])
+        for file in files:
+            info={
+                'name': file.get('name'),
+                'downloadUrl': file.get('downloadUrl'),
+                'type':file.get('type'),
+                'metadata':file.get('metadata')
+            }
+            model_version_files_info.append(info)
         model_version_images_url=[model_version_info.get('images')[i].get('url') for i in range(len(model_version_info.get('images')))]
         model_version_download_url=model_version_info.get('downloadUrl')
-        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc, model_version_files_name, model_version_files_url, model_version_images_url, model_version_download_url
+        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc, model_version_files_info, model_version_images_url, model_version_download_url
     else:
         return None
     
@@ -112,10 +125,19 @@ def get_model_version_info_simple_by_hash_from_api(
         model_trained_words=[model_version_info.get('trainedWords')[i] for i in range(len(model_version_info.get('trainedWords')))]
         base_model=model_version_info.get('baseModel')
         model_version_desc=model_version_info.get('description')
-        model_version_files_name=[model_version_info.get('files')[i].get('name') for i in range(len(model_version_info.get('files')))]
-        model_version_files_url=[model_version_info.get('files')[i].get('downloadUrl') for i in range(len(model_version_info.get('files')))]
+        model_version_files_info=[]
+        model_version_images_info=[]
+        files=model_version_info.get('files', [])
+        for file in files:
+            info={
+                'name': file.get('name'),
+                'downloadUrl': file.get('downloadUrl'),
+                'type':file.get('type'),
+                'metadata':file.get('metadata')
+            }
+            model_version_files_info.append(info)
         model_version_images_url=[model_version_info.get('images')[i].get('url') for i in range(len(model_version_info.get('images')))]
         model_version_download_url=model_version_info.get('downloadUrl')
-        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc, model_version_files_name, model_version_files_url, model_version_images_url, model_version_download_url
+        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc, model_version_files_info, model_version_images_url, model_version_download_url
     else:
         return None
