@@ -76,17 +76,13 @@ def download_file(url: str, filename: str, filesize: float, output_path: str, to
             progress_bar=None
 
         with open(output_file, 'wb') as f:
-            while True:
-                buffer = response.read(CHUNK_SIZE)
-                if not buffer:
-                    break
-
-                f.write(buffer)
-                downloaded += len(buffer)
-
-                if progress_bar:
-                    if is_notebook:
-                        if total_size > 0:
+            for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
+                if chunk:
+                    f.write(chunk)
+                    downloaded += len(chunk)
+                
+                    if progress_bar:
+                        if is_notebook:
                             progress_bar.value = downloaded
                             progress_percentage = (downloaded / total_size)*100
                             elapsed_time = time.time() - start_time
@@ -99,39 +95,33 @@ def download_file(url: str, filename: str, filesize: float, output_path: str, to
                             status_label.value=(
                                 f"<b>{progress_percentage:.2f}%</b> ({downloaded_str}/{total_size_str}) "
                                 f"[{speed_str}, {elapsed_time_str}<{remaining_time_str}]")
-                        else:
-                            progress_bar.value=1
-                            downloaded_str=format_bytes(downloaded)
-                            elapsed_time=time.time()-start_time
-                            elapsed_time_str=format_time(elapsed_time)
-                            status_label.value=f'Downloaded: {downloaded_str}<br>Elapsed Time: {elapsed_time_str}'
-                    elif tqdm:
-                        progress_bar.update(len(buffer))
-                        speed=downloaded/(time.time()-start_time) if time.time()-start_time > 0 else 0
-                        speed_str=f'{speed/(1024**2):.2f} MB/s'
+                        elif tqdm:
+                            progress_bar.update(len(chunk))
+                            speed=downloaded/(time.time()-start_time) if time.time()-start_time > 0 else 0
+                            speed_str=f'{speed/(1024**2):.2f} MB/s'
+                            if total_size>0:
+                                progress_percentage=(downloaded/total_size)*100
+                                progress_bar.set_postfix({
+                                    'percent': f'{progress_percentage:.2f}%',
+                                    'speed': speed_str
+                                    })
+                            else:
+                                progress_bar.set_postfix({
+                                    'downloaded': format_bytes(downloaded),
+                                    'speed': speed_str
+                                    })
+                    else:
+                        elapsed_time=time.time()-start_time
+                        speed=downloaded/elapsed_time if elapsed_time>0 else 0
+                        speed_str=f"{speed/(1024**2):.2f} MB/s"
                         if total_size>0:
                             progress_percentage=(downloaded/total_size)*100
-                            progress_bar.set_postfix({
-                                'percent': f'{progress_percentage:.2f}%',
-                                'speed': speed_str
-                                })
+                            downloaded_str = format_bytes(downloaded)
+                            sys.stdout.write(f"\r{filename} - {progress_percentage:.2f}% ({downloaded_str} / {total_size_str}, {speed_str})")
                         else:
-                            progress_bar.set_postfix({
-                                'downloaded': format_bytes(downloaded),
-                                'speed': speed_str
-                                })
-                else:
-                    elapsed_time=time.time()-start_time
-                    speed=downloaded/elapsed_time if elapsed_time>0 else 0
-                    speed_str=f"{speed/(1024**2):.2f} MB/s"
-                    if total_size>0:
-                        progress_percentage=(downloaded/total_size)*100
-                        downloaded_str = format_bytes(downloaded)
-                        sys.stdout.write(f"\r{filename} - {progress_percentage:.2f}% ({downloaded_str} / {total_size_str}, {speed_str})")
-                    else:
-                        downloaded_str=format_bytes(downloaded)
-                        sys.stdout.write(f"\r{filename} - Downloaded: {downloaded_str}, Speed: ({speed_str})")
-                    sys.stdout.flush()
+                            downloaded_str=format_bytes(downloaded)
+                            sys.stdout.write(f"\r{filename} - Downloaded: {downloaded_str}, Speed: ({speed_str})")
+                        sys.stdout.flush()
         
         end_time = time.time()
         time_taken = end_time - start_time
