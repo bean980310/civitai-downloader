@@ -2,6 +2,7 @@ import threading
 from urllib.parse import urlsplit
 from civitai_downloader.download.backend import download_file
 from civitai_downloader.api.model import get_model_info_from_api, get_model_version_info_from_api
+import time
 
 base_url='https://civitai.com/api/download/models/'
     
@@ -10,8 +11,10 @@ def civitai_download(model_id: int, local_dir: str, token: str):
     if model_version_info:
         url=model_version_info.get('downloadUrl')
         filename=model_version_info.get('files')[0].get('name')
-        start_download_thread(url, local_dir, token)
-        return url, local_dir, token
+        filesize_kb=model_version_info.get('files')[0].get('sizeKB', 0)
+        filesize=int(float(filesize_kb)*1024)
+        start_download_thread(url, filename, filesize, local_dir, token)
+        return url, filename, filesize, local_dir, token
 
 def advanced_download(model_id: int, local_dir: str, token: str, type: enumerate, format: enumerate, size: enumerate, fp: enumerate):
     model_version_info=get_model_version_info_from_api(model_id, token)
@@ -27,8 +30,10 @@ def advanced_download(model_id: int, local_dir: str, token: str, type: enumerate
         for file in filtered_files:
             url=file.get('downloadUrl')
             filename=file.get('name')
-            start_download_thread(url, local_dir, token)
-            return url, local_dir, token
+            filesize_kb=file.get('sizeKB', 0)
+            filesize=int(float(filesize_kb)*1024)
+            start_download_thread(url, filename, filesize, local_dir, token)
+            return url, filename, filesize, local_dir, token
 
 def url_download(url: str, local_dir: str, token: str):
     splited_url=urlsplit(url)
@@ -52,8 +57,10 @@ def url_download(url: str, local_dir: str, token: str):
         for file in filtered_files:
             url=file.get('downloadUrl')
             filename=file.get('name')
-            start_download_thread(url, local_dir, token)
-            return url, local_dir, token
+            filesize_kb=file.get('sizeKB', 0)
+            filesize=int(float(filesize_kb)*1024)
+            start_download_thread(url, filename, filesize, local_dir, token)
+            return url, filename, filesize, local_dir, token
 
 def batch_download(model_id: int, local_dir: str, token: str):
     model_info=get_model_info_from_api(model_id, token)
@@ -69,8 +76,8 @@ def version_batch_download(model_id: int, local_dir: str, token: str):
         get_download_files(model_version_info, local_dir, token)
         return model_version_info, local_dir, token
 
-def start_download_thread(url: str, local_dir: str, token: str):
-    thread = threading.Thread(target=download_file, args=(url, local_dir, token))
+def start_download_thread(url: str, filename: str, filesize: int, local_dir: str, token: str):
+    thread = threading.Thread(target=download_file, args=(url, filename, filesize, local_dir, token))
     thread.start()
 
 def get_download_files(model_info, local_dir, token):
@@ -78,16 +85,25 @@ def get_download_files(model_info, local_dir, token):
     for version in model_info.get('modelVersions', []):
         for file in version.get('files', []):
             download_url=file.get('downloadUrl')
+            filename=file.get('name')
+            filesize_kb=file.get('sizeKB', 0)
+            filesize=int(float(filesize_kb)*1024)
             if download_url:
-                start_download_thread(download_url, local_dir, token)
+                start_download_thread(download_url, filename, filesize, local_dir, token)
                 download_files.append(download_url)
-                return download_url, local_dir, token
+                return download_url, filename, filesize, local_dir, token
+            time.sleep(1)
+        time.sleep(1)
 
 def get_version_download_files(model_version_info, local_dir, token):
     download_files=[]
     for file in model_version_info.get('files', []):
         download_url=file.get('downloadUrl')
+        filename=file.get('name')
+        filesize_kb=file.get('sizeKB', 0)
+        filesize=int(float(filesize_kb)*1024)
         if download_url:
-            start_download_thread(download_url, local_dir, token)
+            start_download_thread(download_url, filename, filesize, local_dir, token)
             download_files.append(download_url)
-            return download_url, local_dir, token
+            return download_url, filename, filesize, local_dir, token
+        time.sleep(1)

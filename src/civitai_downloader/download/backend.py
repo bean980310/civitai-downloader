@@ -4,6 +4,7 @@ import time
 import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 from civitai_downloader.download.format import format_bytes, format_time
+import requests
 
 CHUNK_SIZE = 1638400
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
@@ -28,57 +29,28 @@ def in_jupyter_notebook():
         pass
     return False
 
-def download_file(url: str, output_path: str, token: str):
+def download_file(url: str, filename: str, filesize: float, output_path: str, token: str):
     headers = {
         'Authorization': f'Bearer {token}',
         'User-Agent': USER_AGENT,
     }
-
-    # Disable automatic redirect handling
-    class NoRedirection(urllib.request.HTTPErrorProcessor):
-        def http_response(self, request, response):
-            return response
-        https_response = http_response
     try:
-        request = urllib.request.Request(url, headers=headers)
-        opener = urllib.request.build_opener(NoRedirection)
-        response = opener.open(request)
-
-        status_code=response.getcode()
-        if status_code in [301, 302, 303, 307, 308]:
-            redirect_url = response.getheader('Location')
-
-            # Extract filename from the redirect URL
-            parsed_url = urlparse(redirect_url)
-            query_params = parse_qs(parsed_url.query)
-            content_disposition = query_params.get('response-content-disposition', [None])[0]
-
-            if content_disposition:
-                filename = unquote(content_disposition.split('filename=')[1].strip('"'))
-            else:
-                filename = os.path.basename(parsed_url.path)
-                if not filename:
-                    raise Exception('Unable to determine filename')
-
-            response = urllib.request.urlopen(redirect_url)
-        elif response.status == 404:
-            raise Exception('File not found')
-        else:
-            raise Exception('No redirect found, something went wrong')
-
-        total_size = response.getheader('Content-Length')
-        if total_size is not None:
-            total_size = int(total_size)
-            total_size_str=format_bytes(total_size)
-        else:
-            total_size=0
-            total_size_str='Unknown'
-
         output_file = os.path.join(output_path, filename)
         os.makedirs(output_path, exist_ok=True)
 
         downloaded = 0
         start_time = time.time()
+
+        session=requests.Session()
+        response=session.get(url, headers=headers, stream=True)
+        if response.status_code!=200:
+            print(f"Download Failed!: {filename}")
+            return
+        
+        total_size=int(response.headers.get('content-length', 0))
+        if total_size==0 and filesize>0:
+            total_size=int(filesize)
+        total_size_str=format_bytes(total_size) if total_size>0 else 'Unknown'
 
         is_notebook = in_jupyter_notebook() and widgets
 

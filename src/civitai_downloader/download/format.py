@@ -1,8 +1,7 @@
-
 def format_bytes(size):
     power=1024
     n=0
-    power_labels=['Bytes', 'KB', 'MB', 'GB', 'TB']
+    power_labels=['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB']
     while size >= power and n < len(power_labels)-1:
         size/=power
         n+=1
