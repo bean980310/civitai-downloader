@@ -20,11 +20,11 @@ def advanced_download(model_id: int, local_dir: str, token: str, type: enumerate
     if model_version_info:
         filtered_files=[]
         for file in model_version_info.get('files', []):
-            if type and file.get('type')==type: file['type']=type
+            if type and file.get('type')!=type: continue
             metadata=file.get('metadata')
-            if format and metadata.get('format')==format: metadata['format']=format
-            if size and metadata.get('size')==size: metadata['size']=size
-            if fp and metadata.get('fp')==fp: metadata['fp']=fp
+            if format and metadata.get('format')!=format: continue
+            if size and metadata.get('size')!=size: continue
+            if fp and metadata.get('fp')!=fp: continue
             filtered_files.append(file)
         for file in filtered_files:
             url=file.get('downloadUrl')
