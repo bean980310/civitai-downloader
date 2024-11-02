@@ -1,8 +1,6 @@
 import typer
 from civitai_downloader.download.download import civitai_download, url_download
 from civitai_downloader.token.token import get_token, prompt_for_civitai_token
-from civitai_downloader.args.args import register
-from argparse import ArgumentParser
 
 __all__=[
     'civitai_downloader_cli',
