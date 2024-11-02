@@ -1,3 +1,4 @@
+import os
 from civitai_downloader.download.download import civitai_download, advanced_download
 from civitai_downloader.token.token import get_token, prompt_for_civitai_token
 from civitai_downloader.api.model import get_model_version_info_from_api
@@ -12,9 +13,15 @@ def test_civitai_download():
     model_version_info=get_model_version_info_from_api(model_id, token)
     for files in model_version_info.get('files', []):
         url=files.get('downloadUrl')
+        filename=files.get('name')
+        # filesize_kb=files.get('sizeKb', 0)
+        # filesize=int(float(filesize_kb)*1024)
     civitai_dl=civitai_download(model_id=model_id, local_dir=path, token=token)
     assert url==civitai_dl[0]
-    assert path==civitai_dl[1]
+    assert filename==civitai_dl[1]
+    # assert filesize==civitai_dl[2]
+    assert path==civitai_dl[3]
+    assert os.path.exists(os.path.join(path, filename))
 
 def test_advanced_download():
     model_id=6433
@@ -39,6 +46,12 @@ def test_advanced_download():
         assert metadata.get('size')==size
         assert metadata.get('fp')==fp
         url=file.get('downloadUrl')
+        filename=file.get('name')
+        # filesize_kb=file.get('sizeKb', 0)
+        # filesize=int(float(filesize_kb)*1024)
     advanced_dl=advanced_download(model_id=model_id, local_dir=path, type=type, format=format, size=size, fp=fp, token=token)
     assert url==advanced_dl[0]
-    assert path==advanced_dl[1]
+    assert filename==advanced_dl[1]
+    # assert filesize==advanced_dl[2]
+    assert path==advanced_dl[3]
+    assert os.path.exists(os.path.join(path, filename))

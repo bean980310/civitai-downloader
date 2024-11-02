@@ -9,4 +9,5 @@ civitai_downloader/__pycache__/
 .pytest_cache/
 *.safetensors
 *.ckpt
+*.zip
 test.ipynb
