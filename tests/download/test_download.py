@@ -1,57 +1,45 @@
 import os
 from civitai_downloader.download.download import civitai_download, advanced_download
-from civitai_downloader.token.token import get_token, prompt_for_civitai_token
-from civitai_downloader.api.model import get_model_version_info_from_api
+from civitai_downloader.token.token import get_token
+from civitai_downloader.api.model_version import ModelVersionAPI
 
 token=get_token()
-if token is None:
-    token=prompt_for_civitai_token()
 
 def test_civitai_download():
-    model_id=215522
+    model_version_id=215522
     path="."
-    model_version_info=get_model_version_info_from_api(model_id, token)
-    for files in model_version_info.get('files', []):
-        url=files.get('downloadUrl')
-        filename=files.get('name')
-        # filesize_kb=files.get('sizeKb', 0)
-        # filesize=int(float(filesize_kb)*1024)
-    civitai_dl=civitai_download(model_id=model_id, local_dir=path, token=token)
-    assert url==civitai_dl[0]
-    assert filename==civitai_dl[1]
-    # assert filesize==civitai_dl[2]
-    assert path==civitai_dl[3]
-    assert os.path.exists(os.path.join(path, filename))
+    api=ModelVersionAPI(api_token=token)
+    model=api.get_model_version_info_from_api(model_version_id)
+    if model:
+        file=model.files[0]
+    civitai_download(model_version_id=model_version_id, local_dir=path, token=token)
+    assert os.path.exists(os.path.join(path, file.name))
 
 def test_advanced_download():
-    model_id=6433
+    model_version_id=6433
     path="."
     type='Model'
     format='SafeTensor'
     size='full'
     fp='fp16'
-    model_version_info=get_model_version_info_from_api(model_id, token)
+    api=ModelVersionAPI(api_token=token)
+    model=api.get_model_version_info_from_api(model_version_id)
     filtered_files=[]
-    for file in model_version_info.get('files', []):
-        if file.get('type')!=type: continue
-        metadata=file.get('metadata')
-        if metadata.get('format')!=format: continue
-        if metadata.get('size')!=size: continue
-        if metadata.get('fp')!=fp: continue
+    for file in model.files:
+        if file.type!=type: continue
+        metadata=file.metadata
+        if metadata.format!=format: continue
+        if metadata.size!=size: continue
+        if metadata.fp!=fp: continue
         filtered_files.append(file)
     for file in filtered_files:
-        assert file.get('type')==type
-        metadata=file.get('metadata')
-        assert metadata.get('format')==format
-        assert metadata.get('size')==size
-        assert metadata.get('fp')==fp
-        url=file.get('downloadUrl')
-        filename=file.get('name')
+        assert file.type==type
+        metadata=file.metadata
+        assert metadata.format==format
+        assert metadata.size==size
+        assert metadata.fp==fp
+        filtered_file=file.downloadUrl
         # filesize_kb=file.get('sizeKb', 0)
         # filesize=int(float(filesize_kb)*1024)
-    advanced_dl=advanced_download(model_id=model_id, local_dir=path, type=type, format=format, size=size, fp=fp, token=token)
-    assert url==advanced_dl[0]
-    assert filename==advanced_dl[1]
-    # assert filesize==advanced_dl[2]
-    assert path==advanced_dl[3]
-    assert os.path.exists(os.path.join(path, filename))
+    advanced_download(model_version_id=model_version_id, local_dir=path, type_filter=type, format_filter=format, size_filter=size, fp_filter=fp, token=token)
+    assert os.path.exists(os.path.join(path, filtered_file.name))

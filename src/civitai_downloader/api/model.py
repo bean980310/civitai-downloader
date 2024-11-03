@@ -1,143 +1,87 @@
-from typing import Optional
 import requests
-from civitai_downloader.api import CIVITAI_API_URL
+from datetime import datetime
 
-def get_model_info_from_api(
-        model_id: int, 
-        api_token: Optional[str]=None
-        ):
-    api_url=f'{CIVITAI_API_URL}/models/{model_id}'
-    headers={'Authorization': f'Bearer {api_token}'} if api_token is not None else {}
-    response=requests.get(api_url, headers=headers)
-    if response.status_code==200:
-        data=response.json()
-        return data
-    else:
-        error_code=f'{response.status_code} : {response.text}'
-        return error_code
-    
-def get_model_info_simple_from_api(
-        model_id: int, 
-        api_token: Optional[str]=None, 
-        ):
-    model_info=get_model_info_from_api(model_id, api_token)
-    if model_id:
-        model_name=model_info.get('name')
-        model_type=model_info.get('type')
-        model_poi=model_info.get('poi')
-        model_is_nsfw=model_info.get('nsfw')
-        model_allow_no_credit=model_info.get('allowNoCredit')
-        model_allow_commercial_use=model_info.get('allowCommercialUse')
-        model_stats={
-            'downloadCount': model_info.get('stats').get('downloadCount'),
-            'favoriteCount': model_info.get('stats').get('favoriteCount'),
-            'commentCount': model_info.get('stats').get('commentCount'),
-            'ratingCount': model_info.get('stats').get('ratingCount'),
-            'rating': model_info.get('stats').get('rating')
-        }
-        model_creator_name=model_info.get('creator').get('username')
-        model_creator_image=model_info.get('creator').get('image')
-        model_tags=model_info.get('tags')
-        model_version_info=[]
-        model_versions=model_info.get('modelVersions', [])
-        for model_version in model_versions:
-            info={
-                'id': model_version.get('id'),
-                'name': model_version.get('name'),
-                'createdAt': model_version.get('createdAt'),
-                'updatedAt': model_version.get('updatedAt'),
-                'trainedWords': model_version.get('trainedWords'),
-                'baseModel': model_version.get('baseModel'),
-                'description': model_version.get('description'),
-                'downloadUrl': model_version.get('downloadUrl'),
-                'files.name': [model_version.get('files')[i].get('name') for i in range(len(model_version.get('files')))],
-                'files.downloadUrl': [model_version.get('files')[i].get('downloadUrl') for i in range(len(model_version.get('files')))],
-                'images.url': [model_version.get('images')[i].get('url') for i in range(len(model_version.get('images')))]
-            }
-            model_version_info.append(info)
-        return model_id, model_name, model_type, model_poi, model_is_nsfw, model_allow_no_credit, model_allow_commercial_use, model_stats, model_creator_name, model_creator_image, model_tags, model_version_info
-    else:
-        return None
-    
-def get_model_version_info_from_api(
-        model_version_id: int,
-        api_token: Optional[str]=None, 
-):
-    api_url=f'{CIVITAI_API_URL}/model-versions/{model_version_id}'
-    headers={'Authorization': f'Bearer {api_token}'} if api_token is not None else {}
-    response=requests.get(api_url, headers=headers)
-    if response.status_code==200:
-        data=response.json()
-        return data
-    
-def get_model_version_info_simple_from_api(
-        model_version_id: int,
-        api_token: Optional[str]=None, 
-):
-    model_version_info=get_model_version_info_from_api(model_version_id, api_token)
-    if model_version_id:
-        model_version_name=model_version_info.get('name')
-        model_id=model_version_info.get('modelId')
-        model_created=model_version_info.get('createdAt')
-        model_updated=model_version_info.get('updatedAt')
-        model_trained_words=[model_version_info.get('trainedWords')[i] for i in range(len(model_version_info.get('trainedWords')))]
-        base_model=model_version_info.get('baseModel')
-        model_version_desc=model_version_info.get('description')
-        model_version_files_info=[]
-        model_version_images_info=[]
-        files=model_version_info.get('files', [])
-        for file in files:
-            info={
-                'name': file.get('name'),
-                'downloadUrl': file.get('downloadUrl'),
-                'type':file.get('type'),
-                'metadata':file.get('metadata')
-            }
-            model_version_files_info.append(info)
-        model_version_images_url=[model_version_info.get('images')[i].get('url') for i in range(len(model_version_info.get('images')))]
-        model_version_download_url=model_version_info.get('downloadUrl')
-        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc, model_version_files_info, model_version_images_url, model_version_download_url
-    else:
-        return None
-    
-def get_model_version_info_by_hash_from_api(
-        model_hash: str,
-        api_token: Optional[str]=None
-):
-    api_url=f'{CIVITAI_API_URL}/model-versions/by-hash/{model_hash}'
-    headers={'Authorization': f'Bearer {api_token}'} if api_token is not None else {}
-    response=requests.get(api_url, headers=headers)
-    if response.status_code==200:
-        data=response.json()
-        return data
-    
-def get_model_version_info_simple_by_hash_from_api(
-        model_hash: str,
-        api_token: Optional[str]=None
-):
-    model_version_info=get_model_version_info_by_hash_from_api(model_hash, api_token)
-    if model_hash:
-        model_version_id=model_version_info.get('id')
-        model_version_name=model_version_info.get('name')
-        model_id=model_version_info.get('modelId')
-        model_created=model_version_info.get('createdAt')
-        model_updated=model_version_info.get('updatedAt')
-        model_trained_words=[model_version_info.get('trainedWords')[i] for i in range(len(model_version_info.get('trainedWords')))]
-        base_model=model_version_info.get('baseModel')
-        model_version_desc=model_version_info.get('description')
-        model_version_files_info=[]
-        model_version_images_info=[]
-        files=model_version_info.get('files', [])
-        for file in files:
-            info={
-                'name': file.get('name'),
-                'downloadUrl': file.get('downloadUrl'),
-                'type':file.get('type'),
-                'metadata':file.get('metadata')
-            }
-            model_version_files_info.append(info)
-        model_version_images_url=[model_version_info.get('images')[i].get('url') for i in range(len(model_version_info.get('images')))]
-        model_version_download_url=model_version_info.get('downloadUrl')
-        return model_version_id, model_id, model_version_name, model_created, model_updated, model_trained_words, base_model, model_version_desc, model_version_files_info, model_version_images_url, model_version_download_url
-    else:
-        return None
+from civitai_downloader.api.base import BaseAPI
+from civitai_downloader.api_class import Model, ModelVersionFileMetadata, ModelVersionFile, ModelVersionImages, ModelVersions
+
+class ModelAPI(BaseAPI):
+    def get_model_info_from_api(self, model_id: int)->Model:
+        api_url=f'{self.api_url}/models/{model_id}'
+        headers=self._get_headers()
+        response=requests.get(api_url, headers=headers)
+        if response.status_code==200:
+            data=response.json()
+            return self._parse_model(data)
+        else:
+            response.raise_for_status()
+
+    def _parse_model(self, data: dict)->Model:
+        modelVersions=[]
+        for versions_data in data.get('modelVersions'):
+            files=[]
+            for file_data in versions_data.get('files'):
+                metadata_data=file_data.get('metadata',{})
+                metadata=ModelVersionFileMetadata(
+                fp=metadata_data.get('fp'),
+                size=metadata_data.get('size'),
+                format=metadata_data.get('format'),
+            )
+                file=ModelVersionFile(
+                    name=file_data.get('name'),
+                    id=file_data.get('id'),
+                    sizeKB=file_data.get('sizeKB',0),
+                    type=file_data.get('type'),
+                    metadata=metadata,
+                    pickleScanResult=file_data.get('pickleScanResult'),
+                    pickleScanMessage=file_data.get('pickleScanMessage'),
+                    virusScanResult=file_data.get('virusScanResult'),
+                    scannedAt=file_data.get('scannedAt'),
+                    hashes=file_data.get('hashes',{}),
+                    downloadUrl=file_data.get('downloadUrl'),
+                    primary=file_data.get('primary',False),
+                )
+                files.append(file)
+            images=[]
+            for image_data in data.get('images',[]):
+                image=ModelVersionImages(
+                    url=image_data.get('url'),
+                    nsfw=image_data.get('nsfw'),
+                    width=image_data.get('width'),
+                    height=image_data.get('height'),
+                    hash=image_data.get('hash'),
+                    meta=image_data.get('meta',{}),
+                )
+                images.append(image)
+            version=ModelVersions(
+                id=versions_data.get('id'),
+                modelId=versions_data.get('modelId'),
+                name=versions_data.get('name'),
+                createdAt=datetime.strptime(data.get('createdAt'), '%Y-%m-%dT%H:%M:%S.%fZ'),
+                updatedAt=datetime.strptime(data.get('updatedAt'), '%Y-%m-%dT%H:%M:%S.%fZ'),
+                trainedWords=data.get('trainedWords',[]),
+                baseModel=data.get('baseModel'),
+                earlyAccessTimeFrame=data.get('earlyAccessTimeFrame'),
+                description=data.get('description'),
+                stats=data.get('stats', {}),
+                files=files,
+                images=images,
+                downloadUrl=data.get('downloadUrl'),
+            )
+            modelVersions.append(version)
+        model=Model(
+            id=data.get('id'),
+            name=data.get('name'),
+            description=data.get('description'),
+            type=data.get('type'),
+            poi=data.get('poi'),
+            nsfw=data.get('nsfw'),
+            allowNoCredit=data.get('allowNoCredit'),
+            allowCommercialUse=data.get('allowCommercialUse'),
+            allowDerivates=data.get('allowDerivates'),
+            allowDifferentLicense=data.get('allowDifferentLicense'),
+            stats=data.get('stats', {}),
+            creator=data.get('creator', {}),
+            tags=data.get('tags', []),
+            modelVersions=modelVersions
+        )
+        return model
