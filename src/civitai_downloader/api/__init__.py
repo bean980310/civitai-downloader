@@ -8,5 +8,5 @@ from civitai_downloader.api.base import CIVITAI_API_URL, BaseAPI
 from civitai_downloader.api.client import CivitAIClient
 
 
-__all__=['CreatorsAPI', 'ImagesAPI', 'ModelsAPI', 'ModelAPI', 'ModelVersionAPI', 'TagsAPI', 'CIVITAI_API_URL', 'BaseAPI']
+__all__=['CreatorsAPI', 'ImagesAPI', 'ModelsAPI', 'ModelAPI', 'ModelVersionAPI', 'TagsAPI', 'CIVITAI_API_URL', 'BaseAPI', 'CivitAIClient']
 

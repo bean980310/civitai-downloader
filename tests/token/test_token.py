@@ -1,7 +1,5 @@
-from civitai_downloader.token.token import get_token, prompt_for_civitai_token
+from civitai_downloader import login
 
 def test_token():
-    token=get_token()
-    if token is None:
-        token=prompt_for_civitai_token()
+    token=login()
     assert token

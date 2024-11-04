@@ -1,9 +1,9 @@
 import os
 from civitai_downloader.download.download import civitai_download, advanced_download
-from civitai_downloader.token.token import get_token
+from civitai_downloader import login
 from civitai_downloader.api.model_version import ModelVersionAPI
 
-token=get_token()
+token=login()
 
 def test_civitai_download():
     model_version_id=215522
