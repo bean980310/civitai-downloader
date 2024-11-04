@@ -34,13 +34,13 @@ Import Your CivitAI API Token and Next, Download a model
 from civitai_downloader import login
 from civitai_downloader import civitai_download, url_download
 
-token=login()
+login()
 
 # example
-url_download(url="https://civitai.com/api/download/models/90854", local_dir="./models/checkpoints/sd15", token=token)
+url_download(url="https://civitai.com/api/download/models/90854", local_dir="./models/checkpoints/sd15")
 
 # or
-civitai_download(model_version_id=90854, local_dir="./models/checkpoints/sd15", token=token)
+civitai_download(model_version_id=90854, local_dir="./models/checkpoints/sd15")
 ```
 
 Also, you can use to civitai-downloader command line
