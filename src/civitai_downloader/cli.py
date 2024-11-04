@@ -1,4 +1,5 @@
 import argparse
+from civitai_downloader.__version__ import __version__
 from civitai_downloader.download.download import (
     civitai_download,
     url_download,
@@ -11,6 +12,9 @@ from civitai_downloader.token.token import get_token, prompt_for_civitai_token
 class CivitaiDownloaderCLI:
     def __init__(self):
         self.parser = argparse.ArgumentParser(description="CivitAI Downloader CLI")
+
+        self.parser.add_argument("-v", "--version", action="version", version=f"%(prog)s {__version__}", help='Show program version')
+        
         self.subparsers = self.parser.add_subparsers(dest="command", help="Available commands")
 
         self._add_download_parser()

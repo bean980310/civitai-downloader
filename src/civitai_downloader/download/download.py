@@ -1,90 +1,111 @@
-from urllib.parse import urlsplit
+from typing import List, Optional, Tuple, Dict
+from urllib.parse import urlsplit, parse_qs
 
+from civitai_downloader.api_class import ModelType, ModelFormat, ModelSize, ModelFp, ModelVersionFile
+from civitai_downloader.api import CivitAIClient
 from civitai_downloader.download import Downloader
 from civitai_downloader.download.backend import DownloadManager
-from civitai_downloader.api import CivitAIClient
-from civitai_downloader.api_class import ModelType, ModelFormat, ModelSize, ModelFp
 
 base_url='https://civitai.com/api/download/models/'
+
+class FileFilter:
+    def __init__(self, type_filter: Optional[ModelType]=None, format_filter: Optional[ModelFormat]=None, size_filter: Optional[ModelSize]=None, fp_filter: Optional[ModelFp]=None):
+        self.type_filter=type_filter
+        self.format_filter=format_filter
+        self.size_filter=size_filter
+        self.fp_filter=fp_filter
+
+    @staticmethod
+    def from_query_params(query_string: str)->'FileFilter':
+        params=parse_qs(query_string)
+        type_filter=params.get('type', [None])[0]
+        format_filter=params.get('format', [None])[0]
+        size_filter=params.get('size', [None])[0]
+        fp_filter=params.get('fp', [None])[0]
+
+        return type_filter, format_filter, size_filter, fp_filter
+    
+    def apply(self, files: List[ModelVersionFile])->List[ModelVersionFile]:
+        filtered_files=[]
+
+        for file in files:
+            if self._matches_filters(file):
+                filtered_files.append(file)
+
+        return filtered_files
+    
+    def _matches_criteria(self, file: ModelVersionFile)->bool:
+        if self.type_filter and file.type!=self.type_filter: return False
+        metadata=file.metadata
+        if self.format_filter and metadata.format!=self.format_filter: return False
+        if self.size_filter and metadata.size!=self.size_filter: return False
+        if self.fp_filter and metadata.fp!=self.fp_filter: return False
+
+        return True
+    
+class DownloadHandler:
+    def __init__(self, api_token: str):
+        self.api_token=api_token
+        self.api=CivitAIClient(api_token=api_token)
+        self.downloader=Downloader(api_token=api_token)
+
+    def process_download(self, files: List[ModelVersionFile], local_dir: str)->Optional[Tuple[str, str, int, str, str]]:
+        if not files:
+            return None
+        
+        file=files[0]
+        self.downloader.start_download_thread(file, local_dir)
+        return (file.downloadUrl, file.name, int(float(file.sizeKB)*1024), local_dir, self.api_token)
     
 def civitai_download(model_version_id: int, local_dir: str, token: str):
-    api=CivitAIClient(api_token=token)
-    downloader=Downloader(api_token=token)
-    model_version=api.get_model_version(model_version_id)
+    handler=DownloadHandler(token)
+    model_version=handler.api.get_model_version(model_version_id)
     if model_version and model_version.files:
-        file=model_version.files[0]
-        downloader.start_download_thread(file, local_dir)
-        return file.downloadUrl, file.name, int(file.sizeKB*1024), local_dir, token
+        return handler.process_download(model_version.files, local_dir)
     return None
 
 def advanced_download(model_version_id: int, local_dir: str, token: str, type_filter: ModelType, format_filter: ModelFormat, size_filter: ModelSize, fp_filter: ModelFp):
-    api=CivitAIClient(api_token=token)
-    downloader=Downloader(api_token=token)
-    model_version=api.get_model_version(model_version_id)
+    handler=DownloadHandler(token)
+    model_version=handler.api.get_model_version(model_version_id)
     if model_version:
-        filtered_files=[]
-        for file in model_version.files:
-            if type_filter and file.type!=type_filter: continue
-            metadata=file.metadata
-            if format_filter and metadata.format!=format_filter: continue
-            if size_filter and metadata.size!=size_filter: continue
-            if fp_filter and metadata.fp !=fp_filter: continue
-
-            filtered_files.append(file)
-        
-        if filtered_files:
-            file=filtered_files[0]
-            downloader.start_download_thread(file, local_dir)
-            return file.downloadUrl, file.name, int(file.sizeKB*1024), local_dir, token
-        
-        return None
+        file_filter=FileFilter(type_filter, format_filter, size_filter, fp_filter)
+        filtered_files=file_filter.apply(model_version.files)
+        return handler.process_download(filtered_files, local_dir)
+    return None
 
 def url_download(url: str, local_dir: str, token: str):
-    api=CivitAIClient(api_token=token)
-    downloader=Downloader(api_token=token)
-    splited_url=urlsplit(url)
-    if splited_url.scheme!='https' or splited_url.netloc!='civitai.com': return None
-    model_version_id=splited_url.path.split('/')[-1]
-    if splited_url.query:
-        query_params=dict(param.split('=') for param in splited_url.query.split('&'))
-        type_filter=query_params.get('type')
-        format_filter=query_params.get('format')
-        size_filter=query_params.get('size')
-        fp_filter=query_params.get('fp')
-    model_version=api.get_model_version(model_version_id)
+    handler=DownloadHandler(token)
+    parsed_url=urlsplit(url)
+
+    if parsed_url.scheme!='https' or parsed_url.netloc!='civitai.com': return None
+
+    model_version_id=parsed_url.path.split('/')[-1]
+    model_version=handler.api.get_model_version(model_version_id)
 
     if model_version:
-        filtered_files=[]
-        for file in model_version.files:
-            if type_filter and file.type!=type_filter: continue
-            metadata=file.metadata
-            if format_filter and metadata.format!=format_filter: continue
-            if size_filter and metadata.size!=size_filter: continue
-            if fp_filter and metadata.fp!=fp_filter: continue
-            filtered_files.append(file)
-            
-        if filtered_files:
-            file=filtered_files[0]
-            downloader.start_download_thread(file, local_dir)
-            return file.downloadUrl, file.name, int(file.sizeKB*1024), local_dir, token
-        
-        return None
+        file_filter=FileFilter.from_query_params(parsed_url.query)
+        filtered_files=file_filter.apply(model_version.files)
+        return handler.process_download(filtered_files, local_dir)
+    
+    return None
 
 def batch_download(model_id: int, local_dir: str, token: str):
-    api=CivitAIClient(api_token=token)
-    model=api.get_model(model_id)
-    manager=DownloadManager(model, local_dir, token)
+    handler=DownloadHandler(api_token=token)
+    model=handler.api.get_model(model_id)
+    
     if model:
+        manager=DownloadManager(model, local_dir, token)
         manager.download_all_files()
         return model, local_dir, token
-    else:
-        return None
+    return None
     
 def version_batch_download(model_version_id: int, local_dir: str, token: str):
-    api=CivitAIClient(api_token=token)
-    model_version=api.get_model_version(model_version_id, token)
-    model=model_version.model
-    manager=DownloadManager(model, local_dir, token)
+    handler=DownloadHandler(api_token=token)
+    model_version=handler.api.get_model_version(model_version_id, token)
+    
     if model_version:
+        model=model_version.model
+        manager=DownloadManager(model, local_dir, token)
         manager.version_download_all_files(model_version_id)
         return model, local_dir, token
+    return None

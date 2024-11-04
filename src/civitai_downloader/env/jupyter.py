@@ -30,6 +30,31 @@ class JupyterEnvironmentDetector:
         return False
     
     @staticmethod
+    def in_colab():
+        """Detect if the code is running in Google Colab environment."""
+        try:
+            import google.colab
+            return True
+        except ImportError:
+            return False
+    
+
+    @staticmethod
+    def get_environment_type():
+        """
+        Determine the specific environment type where the code is running.
+        
+        Returns:
+            str: One of 'colab', 'jupyter', or 'other'
+        """
+        if JupyterEnvironmentDetector.in_colab():
+            return 'colab'
+        elif JupyterEnvironmentDetector.in_jupyter_notebook() or JupyterEnvironmentDetector.in_jupyter_shell():
+            return 'jupyter'
+        else:
+            return 'other'
+        
+    @staticmethod
     def get_ipywidgets():
         """
         Check if ipywidgets are available in the current environment.
