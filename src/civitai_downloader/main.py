@@ -1,7 +1,8 @@
 import sys
-from civitai_downloader import cli
+from civitai_downloader.cli import CivitaiDownloaderCLI
 
 def main():
     if len(sys.argv)==1:
         sys.argv.append('--help')
-    cli.civitai_downloader_cli()
+    cli = CivitaiDownloaderCLI()
+    cli.run()

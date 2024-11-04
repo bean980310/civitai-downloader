@@ -1,9 +1,9 @@
+from urllib.parse import urlsplit
+
 from civitai_downloader.download import Downloader
 from civitai_downloader.download.backend import DownloadManager
 from civitai_downloader.api import ModelVersionAPI, ModelAPI
 from civitai_downloader.api_class import ModelType, ModelFormat, ModelSize, ModelFp
-import time
-from urllib.parse import urlsplit
 
 base_url='https://civitai.com/api/download/models/'
     

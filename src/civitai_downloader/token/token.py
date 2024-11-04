@@ -2,6 +2,8 @@ from getpass import getpass
 from pathlib import Path
 import threading
 
+from civitai_downloader.env import JupyterEnvironmentDetector
+
 TOKEN_FILE = Path.home() / '.civitai' / 'config'
 
 def get_token():
@@ -19,19 +21,9 @@ def store_token(token: str):
     with open(TOKEN_FILE, 'w') as file:
         file.write(token)
 
-def in_jupyter():
-    try:
-        from IPython import get_ipython
-        shell=get_ipython().__class__.__name__
-        if shell=='ZMQInteractiveShell':
-            return True
-        else:
-            return False
-    except NameError:
-        return False
-
 def prompt_for_civitai_token():
-    if in_jupyter():
+    widgets, display=JupyterEnvironmentDetector.get_ipywidgets()
+    if widgets():
         import ipywidgets as widgets
         from IPython.display import display
 
