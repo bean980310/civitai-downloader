@@ -23,24 +23,24 @@ pip3 install -e .
 and, Insert your Access token
 
 ```python
-from civitai_downloader.token.token import prompt_for_civitai_token
+from civitai_downloader import login
 
-prompt_for_civitai_token()
+login()
 ```
 
 Import Your CivitAI API Token and Next, Download a model
 
 ```python
-from civitai_downloader.token.token import get_token
-from civitai_downloader.download.download import civitai_download, url_download
+from civitai_downloader import login
+from civitai_downloader import civitai_download, url_download
 
-token=get_token()
+token=login()
 
 # example
 url_download(url="https://civitai.com/api/download/models/90854", local_dir="./models/checkpoints/sd15", token=token)
 
 # or
-civitai_download(model_id=90854, local_dir="./models/checkpoints/sd15", token=token)
+civitai_download(model_version_id=90854, local_dir="./models/checkpoints/sd15", token=token)
 ```
 
 Also, you can use to civitai-downloader command line
