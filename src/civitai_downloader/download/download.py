@@ -57,14 +57,14 @@ class DownloadHandler:
         self.downloader.start_download_thread(file, local_dir)
         return (file.downloadUrl, file.name, int(float(file.sizeKB)*1024), local_dir, self.api_token)
     
-def civitai_download(model_version_id: int, local_dir: str, token: str):
+def _civitai_download(model_version_id: int, local_dir: str, token: str):
     handler=DownloadHandler(token)
     model_version=handler.api.get_model_version(model_version_id)
     if model_version and model_version.files:
         return handler.process_download(model_version.files, local_dir)
     return None
 
-def advanced_download(model_version_id: int, local_dir: str, token: str, type_filter: ModelType, format_filter: ModelFormat, size_filter: ModelSize, fp_filter: ModelFp):
+def _advanced_download(model_version_id: int, local_dir: str, token: str, type_filter: ModelType, format_filter: ModelFormat, size_filter: ModelSize, fp_filter: ModelFp):
     handler=DownloadHandler(token)
     model_version=handler.api.get_model_version(model_version_id)
     if model_version:
@@ -73,7 +73,7 @@ def advanced_download(model_version_id: int, local_dir: str, token: str, type_fi
         return handler.process_download(filtered_files, local_dir)
     return None
 
-def url_download(url: str, local_dir: str, token: str):
+def _url_download(url: str, local_dir: str, token: str):
     handler=DownloadHandler(token)
     parsed_url=urlsplit(url)
 
@@ -89,7 +89,7 @@ def url_download(url: str, local_dir: str, token: str):
     
     return None
 
-def batch_download(model_id: int, local_dir: str, token: str):
+def _batch_download(model_id: int, local_dir: str, token: str):
     handler=DownloadHandler(api_token=token)
     model=handler.api.get_model(model_id)
     
@@ -99,7 +99,7 @@ def batch_download(model_id: int, local_dir: str, token: str):
         return model, local_dir, token
     return None
     
-def version_batch_download(model_version_id: int, local_dir: str, token: str):
+def _version_batch_download(model_version_id: int, local_dir: str, token: str):
     handler=DownloadHandler(api_token=token)
     model_version=handler.api.get_model_version(model_version_id, token)
     
