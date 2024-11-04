@@ -10,7 +10,7 @@ build-backend="setuptools.build_meta"
 
 [project]
 name="civitai-model-downloader"
-version="0.3.22"
+dynamic=["dependencies", "version"]
 
 requires-python=">=3.8, <3.13"
 authors=[
@@ -28,10 +28,10 @@ classifiers=[
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: OS Independent",
 ]
-dynamic=["dependencies"]
 
 [tool.setuptools.dynamic]
 dependencies={file=["requirements.txt"]}
+version={attr="civitai_downloader.__version__.__version__"}
 
 [project.urls]
 Repository = "https://github.com/bean980310/civitai-downloader"
