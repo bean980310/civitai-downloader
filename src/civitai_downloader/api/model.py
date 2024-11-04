@@ -1,5 +1,4 @@
 import requests
-from datetime import datetime
 
 from civitai_downloader.api.base import BaseAPI
 from civitai_downloader.api_class import Model, ModelVersionFileMetadata, ModelVersionFile, ModelVersionImages, ModelVersions
@@ -56,16 +55,16 @@ class ModelAPI(BaseAPI):
                 id=versions_data.get('id'),
                 modelId=versions_data.get('modelId'),
                 name=versions_data.get('name'),
-                createdAt=datetime.strptime(data.get('createdAt'), '%Y-%m-%dT%H:%M:%S.%fZ'),
-                updatedAt=datetime.strptime(data.get('updatedAt'), '%Y-%m-%dT%H:%M:%S.%fZ'),
-                trainedWords=data.get('trainedWords',[]),
-                baseModel=data.get('baseModel'),
-                earlyAccessTimeFrame=data.get('earlyAccessTimeFrame'),
-                description=data.get('description'),
-                stats=data.get('stats', {}),
+                createdAt=versions_data.get('createdAt'),
+                updatedAt=versions_data.get('updatedAt'),
+                trainedWords=versions_data.get('trainedWords',[]),
+                baseModel=versions_data.get('baseModel'),
+                earlyAccessTimeFrame=versions_data.get('earlyAccessTimeFrame'),
+                description=versions_data.get('description'),
+                stats=versions_data.get('stats', {}),
                 files=files,
                 images=images,
-                downloadUrl=data.get('downloadUrl'),
+                downloadUrl=versions_data.get('downloadUrl'),
             )
             modelVersions.append(version)
         model=Model(
@@ -82,6 +81,7 @@ class ModelAPI(BaseAPI):
             stats=data.get('stats', {}),
             creator=data.get('creator', {}),
             tags=data.get('tags', []),
-            modelVersions=modelVersions
+            modelVersions=modelVersions,
+            mode=data.get('mode')
         )
         return model

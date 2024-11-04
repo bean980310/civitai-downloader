@@ -10,10 +10,14 @@ def test_civitai_download():
     path="."
     api=ModelVersionAPI(api_token=token)
     model=api.get_model_version_info_from_api(model_version_id)
+    url=model.downloadUrl
     if model:
         file=model.files[0]
     civitai_download(model_version_id=model_version_id, local_dir=path, token=token)
-    assert os.path.exists(os.path.join(path, file.name))
+    file_exists=os.path.exists(os.path.join(path, file.name))
+    assert model.id==model_version_id
+    assert model.downloadUrl==url
+    assert file_exists
 
 def test_advanced_download():
     model_version_id=6433
@@ -38,8 +42,6 @@ def test_advanced_download():
         assert metadata.format==format
         assert metadata.size==size
         assert metadata.fp==fp
-        filtered_file=file.downloadUrl
-        # filesize_kb=file.get('sizeKb', 0)
-        # filesize=int(float(filesize_kb)*1024)
     advanced_download(model_version_id=model_version_id, local_dir=path, type_filter=type, format_filter=format, size_filter=size, fp_filter=fp, token=token)
-    assert os.path.exists(os.path.join(path, filtered_file.name))
+    file_exists=os.path.exists(os.path.join(path, file.name))
+    assert file_exists

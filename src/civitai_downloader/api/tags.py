@@ -18,10 +18,10 @@ class TagsAPI(BaseAPI):
                 tags.append(tag)
             metadata_data=data.get('metadata', {})
             metadata=Metadata(
-                page=metadata_data.get('page'),
-                pageSize=metadata_data.get('pageSize'),
-                totalItems=metadata_data.get('totalItems'),
-                totalPages=metadata_data.get('totalPages'),
+                totalItems=metadata_data.get('totalItems', 0),
+                currentPage=metadata_data.get('currentPage', 1),
+                pageSize=metadata_data.get('pageSize', len(tags)),
+                totalPages=metadata_data.get('totalPages', 1),
                 nextPage=metadata_data.get('nextPage'),
                 prevPage=metadata_data.get('prevPage')
             )

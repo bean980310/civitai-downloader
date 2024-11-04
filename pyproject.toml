@@ -10,7 +10,7 @@ build-backend="setuptools.build_meta"
 
 [project]
 name="civitai-model-downloader"
-version="0.3.20"
+version="0.3.21"
 
 requires-python=">=3.8, <3.13"
 authors=[

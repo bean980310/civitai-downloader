@@ -15,7 +15,7 @@ class ModelVersions:
     updatedAt: date
     trainedWords: List[str]
     baseModel: BaseModel
-    earlyAccesstimeFrame: int
+    earlyAccessTimeFrame: int
     description: str
     stats: Dict[str, Any]
     files: List[ModelVersionFile]

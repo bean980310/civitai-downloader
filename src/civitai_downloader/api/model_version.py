@@ -1,4 +1,3 @@
-from datetime import datetime
 import requests
 
 from civitai_downloader.api.base import BaseAPI
@@ -66,8 +65,8 @@ class ModelVersionAPI(BaseAPI):
             id=data.get('id'),
             modelId=data.get('modelId'),
             name=data.get('name'),
-            createdAt=datetime.strptime(data.get('createdAt'), '%Y-%m-%dT%H:%M:%S.%fZ'),
-            updatedAt=datetime.strptime(data.get('updatedAt'), '%Y-%m-%dT%H:%M:%S.%fZ'),
+            createdAt=data.get('createdAt'),
+            updatedAt=data.get('updatedAt'),
             trainedWords=data.get('trainedWords',[]),
             baseModel=data.get('baseModel'),
             earlyAccessTimeFrame=data.get('earlyAccessTimeFrame'),

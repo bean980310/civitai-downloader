@@ -7,14 +7,14 @@ token=get_token()
 def test_get_model_info_from_api():
     api=ModelAPI(api_token=token)
     model_id=9409
-    model=api.get_model_info_from_api(model_id)
+    model=api.get_model_info_from_api(model_id=model_id)
     model_name=model.name
     model_type=model.type
     model_poi=model.poi
     model_is_nsfw=model.nsfw
     model_allow_no_credit=model.allowNoCredit
     model_allow_commercial_use=model.allowCommercialUse
-    model_creator_name=model.creator.name
+    model_creator=model.creator
 
     assert model.id == model_id
     assert model.name == model_name
@@ -23,7 +23,7 @@ def test_get_model_info_from_api():
     assert model.nsfw == model_is_nsfw
     assert model.allowNoCredit == model_allow_no_credit
     assert model.allowCommercialUse == model_allow_commercial_use
-    assert model.creator.name == model_creator_name
+    assert model.creator == model_creator
 
 def test_get_model_version_info_from_api():
     api=ModelVersionAPI(api_token=token)
