@@ -5,7 +5,7 @@ import requests
 import threading
 
 from civitai_downloader.api_class import ModelVersionFile
-from civitai_downloader.api import ModelVersionAPI, ModelAPI
+from civitai_downloader.api import CivitAIClient
 from civitai_downloader.env import JupyterEnvironmentDetector
 from civitai_downloader.download.util import DownloadUtils
 
@@ -157,12 +157,11 @@ class DownloadManager:
         self.model_info=model_info
         self.local_dir=local_dir
         self.downloader=Downloader(api_token=token)
-        self.api=ModelAPI(api_token=token)
-        self.api2=ModelVersionAPI(api_token=token)
+        self.api=CivitAIClient(api_token=token)
         self.download_files=[]
 
     def get_download_files(self):
-        model=self.api.get_model_info_from_api(self.model_info.get('id'))
+        model=self.api.get_model(self.model_info.get('id'))
         for version in model.modelVersions:
             for file_data in version.files:
                 file=ModelVersionFile(**file_data)
@@ -174,7 +173,7 @@ class DownloadManager:
             time.sleep(1)
 
     def download_all_files(self):
-        model=self.api.get_model_info_from_api(self.model_info.get('id'))
+        model=self.api.get_model(self.model_info.get('id'))
         for version in model.modelVersions:
             for file_data in version.files:
                 file=ModelVersionFile(**file_data)
@@ -184,7 +183,7 @@ class DownloadManager:
                 time.sleep(1)
 
     def version_download_all_files(self, version_id: int):
-        model=self.api.get_model_info_from_api(self.model_info.get('id'))
+        model=self.api.get_model(self.model_info.get('id'))
         for version in model.modelVersions:
             if version.id==version_id:
                 for file_data in version.files:

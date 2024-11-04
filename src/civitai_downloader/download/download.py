@@ -2,15 +2,15 @@ from urllib.parse import urlsplit
 
 from civitai_downloader.download import Downloader
 from civitai_downloader.download.backend import DownloadManager
-from civitai_downloader.api import ModelVersionAPI, ModelAPI
+from civitai_downloader.api import CivitAIClient
 from civitai_downloader.api_class import ModelType, ModelFormat, ModelSize, ModelFp
 
 base_url='https://civitai.com/api/download/models/'
     
 def civitai_download(model_version_id: int, local_dir: str, token: str):
-    api=ModelVersionAPI(api_token=token)
+    api=CivitAIClient(api_token=token)
     downloader=Downloader(api_token=token)
-    model_version=api.get_model_version_info_from_api(model_version_id)
+    model_version=api.get_model_version(model_version_id)
     if model_version and model_version.files:
         file=model_version.files[0]
         downloader.start_download_thread(file, local_dir)
@@ -18,9 +18,9 @@ def civitai_download(model_version_id: int, local_dir: str, token: str):
     return None
 
 def advanced_download(model_version_id: int, local_dir: str, token: str, type_filter: ModelType, format_filter: ModelFormat, size_filter: ModelSize, fp_filter: ModelFp):
-    api=ModelVersionAPI(api_token=token)
+    api=CivitAIClient(api_token=token)
     downloader=Downloader(api_token=token)
-    model_version=api.get_model_version_info_from_api(model_version_id)
+    model_version=api.get_model_version(model_version_id)
     if model_version:
         filtered_files=[]
         for file in model_version.files:
@@ -40,7 +40,7 @@ def advanced_download(model_version_id: int, local_dir: str, token: str, type_fi
         return None
 
 def url_download(url: str, local_dir: str, token: str):
-    api=ModelVersionAPI(api_token=token)
+    api=CivitAIClient(api_token=token)
     downloader=Downloader(api_token=token)
     splited_url=urlsplit(url)
     if splited_url.scheme!='https' or splited_url.netloc!='civitai.com': return None
@@ -51,7 +51,7 @@ def url_download(url: str, local_dir: str, token: str):
         format_filter=query_params.get('format')
         size_filter=query_params.get('size')
         fp_filter=query_params.get('fp')
-    model_version=api.get_model_version_info_from_api(model_version_id)
+    model_version=api.get_model_version(model_version_id)
 
     if model_version:
         filtered_files=[]
@@ -71,8 +71,8 @@ def url_download(url: str, local_dir: str, token: str):
         return None
 
 def batch_download(model_id: int, local_dir: str, token: str):
-    api=ModelAPI(api_token=token)
-    model=api.get_model_info_from_api(model_id)
+    api=CivitAIClient(api_token=token)
+    model=api.get_model(model_id)
     manager=DownloadManager(model, local_dir, token)
     if model:
         manager.download_all_files()
@@ -81,8 +81,8 @@ def batch_download(model_id: int, local_dir: str, token: str):
         return None
     
 def version_batch_download(model_version_id: int, local_dir: str, token: str):
-    api=ModelVersionAPI(api_token=token)
-    model_version=api.get_model_version_info_from_api(model_version_id, token)
+    api=CivitAIClient(api_token=token)
+    model_version=api.get_model_version(model_version_id, token)
     model=model_version.model
     manager=DownloadManager(model, local_dir, token)
     if model_version:
