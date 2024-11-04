@@ -25,12 +25,12 @@ class CivitAIClient(BaseAPI):
         self.api_url = api_url
         
         # Initialize all API handlers
-        self._creators = CreatorsAPI(api_url, api_token)
-        self._images = ImagesAPI(api_url, api_token)
-        self._model_version = ModelVersionAPI(api_url, api_token)
-        self._model = ModelAPI(api_url, api_token)
-        self._models = ModelsAPI(api_url, api_token)
-        self._tags = TagsAPI(api_url, api_token)
+        self._creators = CreatorsAPI(api_token=api_token, api_url=api_url)
+        self._images = ImagesAPI(api_token=api_token, api_url=api_url)
+        self._model_version = ModelVersionAPI(api_token=api_token, api_url=api_url)
+        self._model = ModelAPI(api_token=api_token, api_url=api_url)
+        self._models = ModelsAPI(api_token=api_token, api_url=api_url)
+        self._tags = TagsAPI(api_token=api_token, api_url=api_url)
 
     # Base methods
     def get_headers(self) -> Dict[str, str]:

@@ -15,21 +15,21 @@ class FileFilter:
         self.size_filter=size_filter
         self.fp_filter=fp_filter
 
-    @staticmethod
-    def from_query_params(query_string: str)->'FileFilter':
+    @classmethod
+    def from_query_params(cls, query_string: str)->'FileFilter':
         params=parse_qs(query_string)
         type_filter=params.get('type', [None])[0]
         format_filter=params.get('format', [None])[0]
         size_filter=params.get('size', [None])[0]
         fp_filter=params.get('fp', [None])[0]
 
-        return type_filter, format_filter, size_filter, fp_filter
+        return cls(type_filter, format_filter, size_filter, fp_filter)
     
     def apply(self, files: List[ModelVersionFile])->List[ModelVersionFile]:
         filtered_files=[]
 
         for file in files:
-            if self._matches_filters(file):
+            if self._matches_criteria(file):
                 filtered_files.append(file)
 
         return filtered_files
