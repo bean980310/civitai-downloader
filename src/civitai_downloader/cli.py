@@ -68,14 +68,13 @@ class CivitaiDownloaderCLI:
             self.parser.print_help()
 
     def download(self, model_version_id, local_dir):
-        civitai_download(model_version_id=model_version_id, local_dir=local_dir, token=login())
+        civitai_download(model_version_id=model_version_id, local_dir=local_dir)
         print(f"Downloaded model version {model_version_id} to {local_dir}")
 
     def advanced_download(self, model_version_id, local_dir, type_filter, format_filter, size_filter, fp_filter):
         advanced_download(
             model_version_id=model_version_id,
             local_dir=local_dir,
-            token=login(),
             type_filter=type_filter,
             format_filter=format_filter,
             size_filter=size_filter,
@@ -84,15 +83,15 @@ class CivitaiDownloaderCLI:
         print(f"Advanced download of model version {model_version_id} to {local_dir}")
 
     def url_download(self, model_url, local_dir):
-        url_download(url=model_url, local_dir=local_dir, token=login())
+        url_download(url=model_url, local_dir=local_dir)
         print(f"Downloaded model from URL {model_url} to {local_dir}")
 
     def batch_download(self, model_id, local_dir):
-        batch_download(model_id=model_id, local_dir=local_dir, token=login())
+        batch_download(model_id=model_id, local_dir=local_dir)
         print(f"Batch downloaded models with ID {model_id} to {local_dir}")
 
     def version_batch_download(self, model_version_id, local_dir):
-        version_batch_download(model_version_id=model_version_id, local_dir=local_dir, token=login())
+        version_batch_download(model_version_id=model_version_id, local_dir=local_dir)
         print(f"Batch downloaded model version {model_version_id} to {local_dir}")
 
     def store_token(self):
