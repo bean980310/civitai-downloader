@@ -10,6 +10,7 @@ from civitai_downloader.api_class import ModelVersionFile
 from civitai_downloader.api import CivitAIClient
 from civitai_downloader.env import JupyterEnvironmentDetector
 from civitai_downloader.download.util import DownloadUtils
+from civitai_downloader.download.file_name_extractor import FileNameExtractor
 
 try:
     from tqdm import tqdm
@@ -167,16 +168,40 @@ class Downloader:
         thread.start()
         return thread
     
-    def _download_file(self, file: ModelVersionFile, save_dir: str, overwrite: bool=False):
+    def _download_file(self, file: ModelVersionFile, save_dir: str, overwrite: bool=False)->None:
         url=file.downloadUrl
-        filename=file.name
-        filesize=int(float(file.sizeKB)*1024)
+        extracted_filename=None
+        
+        if not file.name:
+            extracted_filename = FileNameExtractor.from_url(url)
 
-        output_file=os.path.join(save_dir, filename)
+            if extracted_filename:
+                # 추출 성공 시, file.name에 반영
+                file.name = extracted_filename
+
+                # 만약 "API 호출로 파일 찾기" 과정을 아예 건너뛰고 싶다면
+                # return 키워드를 사용해 여기서 바로 다운로드를 진행하거나, 
+                # 이미 code가 있다면 아래로 그대로 이어가도 됨.
+                print(f"Filename found via URL parsing: {file.name}")
+                
+        if not file.name:
+            # get detail info from API
+            # (예시) file_id가 있다면 추가 정보 호출
+            # file_info = self.api_client.get_file_info(file_id=???)
+            # if file_info:
+            #     file.name = file_info.name
+            pass
+
+        # file.name이 그래도 없으면 fallback 처리
+        if not file.name:
+            file.name = "untitled.bin"
+
+
+        output_file=os.path.join(save_dir, file.name)
         os.makedirs(save_dir, exist_ok=True)
 
         if os.path.exists(output_file) and not overwrite:
-            print(f"File already exists: {filename}")
+            print(f"File already exists: {file.name}")
             return
 
         headers={
@@ -188,28 +213,21 @@ class Downloader:
         downloaded=0
         start_time=time.time()
 
-        try:
-            session=requests.Session()
-            response=session.get(url, headers=headers, stream=True)
-            response.raise_for_status()
-
-            total_size=int(response.headers.get('content-length', 0))
-            if total_size==0 and filesize>0:
-                total_size=filesize
-            
-            progress_handler.setup(filename, total_size)
+        print(f"Downloading: {file.downloadUrl}")
+        with requests.get(url, headers=headers, stream=True) as r:
+            r.raise_for_status()
+            total_size = int(r.headers.get('content-length', 0))
+            downloaded = 0
+            start_time = time.time()
 
             with open(output_file, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=self.CHUNK_SIZE):
+                for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
                     if chunk:
                         f.write(chunk)
                         downloaded += len(chunk)
-                        progress_handler.update(len(chunk), downloaded, total_size, time.time()-start_time)
-                    
-            progress_handler.finish(time.time()-start_time)
+                        # 진행률 표시 등등
 
-        except Exception as e:
-            progress_handler.error(str(e))
+        print(f"Saved as: {output_file}\n")
     
 class DownloadManager:
     def __init__(self, model_info, local_dir, token):

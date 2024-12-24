@@ -1,10 +1,13 @@
 from typing import List, Optional, Tuple, Dict
 from urllib.parse import urlsplit, parse_qs
+import os
 
 from civitai_downloader.api_class import ModelType, ModelFormat, ModelSize, ModelFp, ModelVersionFile
 from civitai_downloader.api import CivitAIClient
 from civitai_downloader.download import Downloader
 from civitai_downloader.download.backend import DownloadManager
+
+from civitai_downloader.download.file_name_extractor import FileNameExtractor
 
 base_url='https://civitai.com/api/download/models/'
 
@@ -59,17 +62,43 @@ class DownloadHandler:
     
 def _civitai_download(model_version_id: int, local_dir: str, token: str):
     handler=DownloadHandler(token)
-    model_version=handler.api.get_model_version(model_version_id)
+    
+    url = f"{base_url}{model_version_id}"
+    extracted_filename = FileNameExtractor.from_url(url)
+    if extracted_filename:
+        fake_file = ModelVersionFile(
+            downloadUrl = url,
+            name = extracted_filename,
+            sizeKB = 0.0,
+            type = None,
+            metadata = None
+        )
+        return handler.process_download([fake_file], local_dir)
+    
+    model_version = handler.api.get_model_version(model_version_id)
     if model_version and model_version.files:
         return handler.process_download(model_version.files, local_dir)
     return None
 
 def _advanced_download(model_version_id: int, local_dir: str, token: str, type_filter: ModelType, format_filter: ModelFormat, size_filter: ModelSize, fp_filter: ModelFp):
     handler=DownloadHandler(token)
-    model_version=handler.api.get_model_version(model_version_id)
+    url = f"{base_url}{model_version_id}"
+
+    extracted_filename = FileNameExtractor.from_url(url)
+    if extracted_filename:
+        fake_file = ModelVersionFile(
+            downloadUrl = url,
+            name = extracted_filename,
+            sizeKB = 0.0,
+            type = None,
+            metadata = None
+        )
+        return handler.process_download([fake_file], local_dir)
+    
+    model_version = handler.api.get_model_version(model_version_id)
     if model_version:
-        file_filter=FileFilter(type_filter, format_filter, size_filter, fp_filter)
-        filtered_files=file_filter.apply(model_version.files)
+        file_filter = FileFilter(type_filter, format_filter, size_filter, fp_filter)
+        filtered_files = file_filter.apply(model_version.files)
         return handler.process_download(filtered_files, local_dir)
     return None
 
@@ -78,9 +107,23 @@ def _url_download(url: str, local_dir: str, token: str):
     parsed_url=urlsplit(url)
 
     if parsed_url.scheme!='https' or parsed_url.netloc!='civitai.com': return None
-
-    model_version_id=parsed_url.path.split('/')[-1]
-    model_version=handler.api.get_model_version(model_version_id)
+    
+    extracted_filename = FileNameExtractor.from_url(url)
+    if extracted_filename:
+        # 파일명을 찾았다면, ModelVersionFile을 가짜로 하나 만들어서 바로 다운로드
+        # (필요 필드를 최소한으로 채워 넣습니다.)
+        fake_file = ModelVersionFile(
+            downloadUrl = url,
+            name = extracted_filename,
+            sizeKB = 0.0,          # 임의 값
+            type = None,           # ModelType등이 필요하면 채워넣거나 None으로 둠
+            metadata = None        # 마찬가지
+        )
+        # process_download()는 List[ModelVersionFile]을 받으므로 리스트로 감싼다.
+        return handler.process_download([fake_file], local_dir)
+    
+    model_version_id = parsed_url.path.split('/')[-1]
+    model_version = handler.api.get_model_version(model_version_id)
 
     if model_version:
         file_filter=FileFilter.from_query_params(parsed_url.query)
