@@ -1,104 +1,70 @@
-from getpass import getpass
+# src/civitai_downloader/token/token.py
+
+import os
+import requests
 from pathlib import Path
-import threading
-from typing import Optional, Tuple
-from abc import ABC, abstractmethod
+from typing import Optional
+
+TOKEN_FILE = Path.home() / '.civitai' / 'config'
+CIVITAI_HOST = 'https://civitai.com'
+ENV_TOKEN_NAME = 'CIVITAI_TOKEN'
 
 class TokenManager:
-    def __init__(self, token_dir: str='.civitai'):
-        self.token_file=Path.home()/token_dir/'config'
-        self.token_file.parent.mkdir(parents=True, exist_ok=True)
+    """
+    CivitAI 다운로드를 위한 토큰을 관리하는 클래스.
+    1) 환경 변수 (CIVITAI_TOKEN)
+    2) 로컬 설정 파일 (~/.civitai/config)
+    3) 사용자 입력 (prompt)
+    순으로 우선순위를 두고 조회한다.
+    """
+    def __init__(self, host: str = CIVITAI_HOST):
+        self.host = host
 
-    def get_token(self)->Optional[str]:
+    def get_token(self, prompt_if_missing: bool = True) -> Optional[str]:
+        """
+        토큰을 가져온다:
+          1) ENV_TOKEN_NAME 환경 변수
+          2) TOKEN_FILE 파일
+          3) (옵션) 사용자 입력 프롬프트
+        순으로 찾고, 찾으면 검증(선택) 후 반환.
+        """
+        # 1) 환경 변수
+        token = os.environ.get(ENV_TOKEN_NAME)
+        if token:
+           return token
+
+        # 2) 로컬 설정 파일
+        if TOKEN_FILE.is_file():
+            try:
+                file_token = TOKEN_FILE.read_text().strip()
+                return file_token
+            except Exception as e:
+                print(f"[ERROR] Failed to read token file: {e}")
+
+        # 3) 프롬프트로 입력받기
+        if prompt_if_missing:
+            new_token = self.prompt_for_token()
+            if new_token:
+                self.store_token(new_token)
+                return new_token
+
+        return None
+
+    def prompt_for_token(self) -> Optional[str]:
+        """
+        사용자에게 토큰 입력을 요청한다.
+        주피터/코랩 환경인지 여부에 따라 input() 또는 widgets.Text() 등을 쓰도록 조정 가능.
+        """
         try:
-            with open(self.token_file, 'r') as f:
-                return f.read().strip()
-        except Exception as e:
+            token = input("Enter CivitAI API Token: ").strip()
+            return token if token else None
+        except EOFError:
             return None
-        
-    def store_token(self, token: str)->None:
-        with open(self.token_file, 'w') as f:
-            f.write(token)
 
-    def login(self)->str:
-        existing_token=self.get_token()
-        if existing_token:
-            print('CivitAI API token already exists.')
-            return existing_token
-        return self._prompt_for_token()
-    
-    @abstractmethod
-    def _prompt_for_token(self)->str:
-        pass
-
-class ConsoleTokenManager(TokenManager):
-    def _prompt_for_token(self)->str:
-        try:
-            token = getpass('Please enter your CivitAI API token: ')
-        except Exception as e:
-            token = input('Please enter your CivitAI API token: ')
-        self.store_token(token)
-        return token
-    
-class NotebookTokenManager(TokenManager):
-    def __init__(self, token_dir: str='.civitai'):
-        super().__init__(token_dir)
-        from civitai_downloader.env import JupyterEnvironmentDetector
-        self.env_detector=JupyterEnvironmentDetector
-        self.widgets, self.display=self.env_detector.get_ipywidgets()
-        self.is_colab=self.env_detector.in_colab()
-
-    def _prompt_for_token(self)->str:
-        token_widget=self.widgets.Password(
-            description='CivitAI API Token:',
-            placeholder='Enter your CivitAI API token',
-            style={'description_width': 'initial'},
-            layout=self.widgets.Layout(width='50%' if self.is_colab else 'auto')
-        )
-
-        submit_button=self.widgets.Button(
-            description='Submit',
-            layout=self.widgets.Layout(width='100px'))
-        
-        output=self.widgets.Output()
-
-        container=self.widgets.VBox([
-            token_widget,
-            submit_button,
-            output
-        ], layout=self.widgets.Layout(
-            padding='10px',
-            align_items='flex-start'
-        ))
-
-        token_event=threading.Event()
-        token=None
-
-        def on_submit(b):
-            nonlocal token
-            token=token_widget.value
-            self.store_token(token)
-            with output:
-                print('Token stored successfully.')
-            container.close()
-            token_event.set()
-            
-        submit_button.on_click(on_submit)
-        self.display(container)
-            
-        token_event.wait()
-        return token
-
-def create_token_manager(token_dir: str='.civitai')->TokenManager:
-    try:
-        from civitai_downloader.env import JupyterEnvironmentDetector
-        is_notebook=JupyterEnvironmentDetector.in_jupyter_notebook()
-        is_colab=JupyterEnvironmentDetector.in_colab()
-        widgets, _=JupyterEnvironmentDetector.get_ipywidgets()
-
-        if widgets and (is_notebook or is_colab):
-            return NotebookTokenManager(token_dir)
-    except ImportError:
-        pass
-
-    return ConsoleTokenManager(token_dir)
+    def store_token(self, token: str) -> None:
+        """
+        로컬 설정 파일에 토큰을 저장한다.
+        """
+        TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+        TOKEN_FILE.write_text(token.strip(), encoding='utf-8')
+        print(f"Token file saved to {TOKEN_FILE}.")
