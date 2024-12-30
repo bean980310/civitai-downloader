@@ -2,6 +2,7 @@
 
 import os
 import requests
+import getpass
 from pathlib import Path
 from typing import Optional
 
@@ -56,7 +57,7 @@ class TokenManager:
         주피터/코랩 환경인지 여부에 따라 input() 또는 widgets.Text() 등을 쓰도록 조정 가능.
         """
         try:
-            token = input("Enter CivitAI API Token: ").strip()
+            token = getpass.getpass("Enter CivitAI API Token: ").strip()
             return token if token else None
         except EOFError:
             return None

@@ -56,13 +56,13 @@ class FileFilter:
 # --------------------------------------------
 # (1) _civitai_download : 기존 단일 다운로드
 # --------------------------------------------
-def _civitai_download(model_version_id: int, local_dir: str, token: str):
+def _civitai_download(model_version_id: int, local_dir: str, token: str, use_cache: bool=True, cache_dir: Optional[str]=None):
     client = CivitAIClient(api_token=token)
     url = f"{base_url}{model_version_id}"
     extracted_filename = FileNameExtractor.from_url(url)
 
     # Downloader (단일 파일 다운로드) 사용
-    downloader = Downloader(api_token=token)
+    downloader = Downloader(api_token=token, use_cache=use_cache, cache_dir=cache_dir)
 
     if extracted_filename:
         # URL로부터 파일명 추출 성공
@@ -75,20 +75,16 @@ def _civitai_download(model_version_id: int, local_dir: str, token: str):
         )
         # downloader로 단일 파일 다운로드
         downloader._download_file(fake_file, local_dir)
-        return (url, extracted_filename, 0, local_dir, token)
+        return f"{local_dir}/{extracted_filename}"
 
     # 실패 -> API 요청하여 model_version.files를 가져옴
     model_version = client.get_model_version(model_version_id)
     if model_version and model_version.files:
         target_file = model_version.files[0]
         downloader._download_file(target_file, local_dir)
-        return (
-            target_file.downloadUrl,
-            target_file.name,
-            int(float(target_file.sizeKB)*1024),
-            local_dir,
-            token
-        )
+        return f"{local_dir}/{extracted_filename}"
+    
+    print("No file found to download.")
     return None
 
 # ---------------------------------------------
@@ -101,7 +97,9 @@ def _advanced_download(
     type_filter: ModelType,
     format_filter: ModelFormat,
     size_filter: ModelSize,
-    fp_filter: ModelFp
+    fp_filter: ModelFp,
+    use_cache: bool=True,
+    cache_dir: Optional[str]=None
 ):
     """
     model_version_id로부터 모델 버전을 조회한 다음,
@@ -111,7 +109,7 @@ def _advanced_download(
     url = f"{base_url}{model_version_id}"
     extracted_filename = FileNameExtractor.from_url(url)
 
-    downloader = Downloader(api_token=token)
+    downloader = Downloader(api_token=token, use_cache=use_cache, cache_dir=cache_dir)
 
     if extracted_filename:
         # URL로부터 파일명 추출 -> 곧바로 다운로드 시도
@@ -123,7 +121,7 @@ def _advanced_download(
             metadata=None
         )
         downloader._download_file(fake_file, local_dir)
-        return (fake_file.downloadUrl, fake_file.name, 0, local_dir, token)
+        return f"{local_dir}/{extracted_filename}"
 
     # 추출 실패 -> model_version 조회
     model_version = client.get_model_version(model_version_id)
@@ -140,24 +138,18 @@ def _advanced_download(
     # (b) 여기서는 일단 "첫 번째 파일"만 다운로드 (기존과 동일)
     target_file = filtered_files[0]
     downloader._download_file(target_file, local_dir)
-    return (
-        target_file.downloadUrl,
-        target_file.name,
-        int(float(target_file.sizeKB)*1024),
-        local_dir,
-        token
-    )
+    return f"{local_dir}/{extracted_filename}"
 
 # -----------------------------------------------
 # (3) _url_download, _batch_download, etc. 예시
 # -----------------------------------------------
-def _url_download(url: str, local_dir: str, token: str):
+def _url_download(url: str, local_dir: str, token: str, use_cache: bool=True, cache_dir: Optional[str]=None):
     client = CivitAIClient(api_token=token)
     parsed_url = urlsplit(url)
     if parsed_url.scheme != 'https' or parsed_url.netloc != 'civitai.com':
         return None
 
-    downloader = Downloader(api_token=token)
+    downloader = Downloader(api_token=token, use_cache=use_cache, cache_dir=cache_dir)
     extracted_filename = FileNameExtractor.from_url(url)
     if extracted_filename:
         # 그대로 단일 다운로드
@@ -169,7 +161,7 @@ def _url_download(url: str, local_dir: str, token: str):
             metadata=None
         )
         downloader._download_file(fake_file, local_dir)
-        return (url, extracted_filename, 0, local_dir, token)
+        return f"{local_dir}/{extracted_filename}"
 
     # or else: ...
     model_version_id = parsed_url.path.split('/')[-1]
@@ -183,16 +175,11 @@ def _url_download(url: str, local_dir: str, token: str):
     if filtered_files:
         target_file = filtered_files[0]
         downloader._download_file(target_file, local_dir)
-        return (
-            target_file.downloadUrl,
-            target_file.name,
-            int(float(target_file.sizeKB)*1024),
-            local_dir,
-            token
-        )
+        return f"{local_dir}/{extracted_filename}"
+    
     return None
 
-def _batch_download(model_id: int, local_dir: str, token: str):
+def _batch_download(model_id: int, local_dir: str, token: str, use_cache: bool=True, cache_dir: Optional[str]=None):
     """
     모델 ID로 전체 버전을 순회하며 모든 파일 다운로드 (예시).
     만약 스레드 병렬 처리를 원하면 `DownloadManager`를 쓸 수도 있음.
@@ -209,15 +196,16 @@ def _batch_download(model_id: int, local_dir: str, token: str):
     # return model, local_dir, token
 
     # 여기서는 간단히 '각 버전의 각 파일'을 하나씩 Downloader._download_file()로 다운로드하는 예시
-    downloader = Downloader(api_token=token)
+    downloader = Downloader(api_token=token, use_cache=use_cache, cache_dir=cache_dir)
     for version in model.modelVersions:
         for file_data in version.files:
             file_obj = ModelVersionFile(**file_data)
             downloader._download_file(file_obj, local_dir)
 
-    return (model, local_dir, token)
+    print("All file downloaded!")
+    return
 
-def _version_batch_download(model_version_id: int, local_dir: str, token: str):
+def _version_batch_download(model_version_id: int, local_dir: str, token: str, use_cache: bool=True, cache_dir: Optional[str]=None):
     """
     특정 버전 ID에 해당하는 모든 파일 다운로드.
     """
@@ -226,8 +214,9 @@ def _version_batch_download(model_version_id: int, local_dir: str, token: str):
     if not model_version:
         return None
 
-    downloader = Downloader(api_token=token)
+    downloader = Downloader(api_token=token, use_cache=use_cache, cache_dir=cache_dir)
     for file_data in model_version.files:
         file_obj = ModelVersionFile(**file_data)
         downloader._download_file(file_obj, local_dir)
-    return (model_version.model, local_dir, token)
+    print("All file downloaded!")
+    return

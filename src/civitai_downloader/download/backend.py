@@ -3,6 +3,8 @@ import sys
 import time
 import requests
 import threading
+import tempfile
+import shutil
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -189,10 +191,18 @@ class Downloader:
     CHUNK_SIZE = 1638400
     USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
 
-    def __init__(self, api_token: str):
+    def __init__(self, api_token: str, use_cache: bool=True, cache_dir: Optional[str]=None):
+        """
+        api_token : civitai API 토큰
+        cache_dir : 사용자 지정 임시(캐시) 디렉토리 경로.
+                    None이면 tempfile.mkdtemp() 등으로 다운로드 시마다 임시 디렉토리를 생성/삭제
+        """
         self.api_token = api_token
-        # 필요하다면 CivitAIClient를 생성해도 됨
-        # self.api = CivitAIClient(api_token=api_token)
+        self.use_cache = use_cache
+        self.cache_dir = cache_dir
+
+        if self.cache_dir:
+            os.makedirs(cache_dir, exist_ok=True)
 
     def _get_progress_handler(self) -> ProgressHandler:
         # Jupyter/Colab인 경우 NotebookProgressHandler,
@@ -269,16 +279,31 @@ class Downloader:
         progress_handler.setup(file.name, total_size)
         print(f"Downloading: {url}")
 
-        with open(output_file, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
-                if not chunk:
-                    continue
-                f.write(chunk)
-                downloaded += len(chunk)
-                elapsed = time.time() - start_time
-                progress_handler.update(len(chunk), downloaded, total_size, elapsed)
+        if self.use_cache:
+            if not self.cache_dir:
+                self.cache_dir = os.path.join(save_dir, ".civitai", "download")
+                os.makedirs(self.cache_dir, exist_ok=True)
+            temp_filepath = os.path.join(self.cache_dir, f"{file.name}.download")
+            temp_dir=None
+        else:
+            # 매번 임시 디렉토리 생성 -> 다운로드 끝나면 삭제
+            temp_dir = tempfile.mkdtemp(prefix='civitai_cache_')
+            temp_filepath = os.path.join(temp_dir, file.name)
 
-        r.close()
+        try:
+            with open(temp_filepath, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=self.CHUNK_SIZE):
+                    if not chunk:
+                        continue
+                    f.write(chunk)
+                    downloaded += len(chunk)
+                    elapsed = time.time() - start_time
+                    progress_handler.update(len(chunk), downloaded, total_size, elapsed)
+            r.close()
+            shutil.move(temp_filepath, output_file)
+        finally:
+            if not self.cache_dir:
+                shutil.rmtree(temp_dir, ignore_errors=True)
 
         time_taken = time.time() - start_time
         progress_handler.finish(time_taken)
