@@ -17,6 +17,9 @@ requirements:
   host:
     - pip
     - python>=3.9,<3.13
+    - setuptools>=42
+    - wheel
+    - build
   run:
     - python>=3.9,<3.13
     - requests
@@ -27,14 +30,16 @@ requirements:
     - typer
 
 about:
-  home: The package home page
+  home: https://github.com/bean980310/civitai-downloader.git
   license: "GNU General Public v3 or later (GPLv3+)"
   license_family: GPL3
-  license_file: 
+  license_file: LICENSE
   summary: "A package to download models from CivitAI"
+  description: |
+    Model Downloader Package for Python Developer and CLI for CivitAI. It is recommanded on Amazon Web Services, Microsoft Azure, Google Cloud Platform.
   doc_url: 
-  dev_url: 
+  dev_url: https://github.com/bean980310/civitai-downloader
 
 extra:
   recipe-maintainers:
-    - your-github-id-here
+    - bean980310
