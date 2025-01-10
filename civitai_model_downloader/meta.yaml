@@ -16,12 +16,12 @@ build:
 requirements:
   host:
     - pip
-    - python>=3.9,<3.13
-    - setuptools>=42
+    - python
+    - setuptools
     - wheel
     - build
   run:
-    - python>=3.9,<3.13
+    - python
     - requests
     - tqdm
     - ipywidgets
