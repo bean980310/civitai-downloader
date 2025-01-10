@@ -19,6 +19,12 @@ requirements:
     - python
   run:
     - python
+    - requests
+    - tqdm
+    - ipywidgets
+    - appdirs
+    - urllib3
+    - typer
 
 about:
   home: The package home page
