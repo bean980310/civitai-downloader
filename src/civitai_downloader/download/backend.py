@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from civitai_downloader.api_class import ModelVersionFile
-from civitai_downloader.api import CivitAIClient
+from civitai_downloader.api import CivitAIClient, get_user_agent
 from civitai_downloader.env import JupyterEnvironmentDetector
 from civitai_downloader.download.util import DownloadUtils
 from civitai_downloader.download.file_name_extractor import FileNameExtractor
@@ -189,7 +189,7 @@ class ConsoleProgressHandler(ProgressHandler):
 # ----------------------------------------------------------------------------
 class Downloader:
     CHUNK_SIZE = 1638400
-    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    USER_AGENT = get_user_agent()
 
     def __init__(self, api_token: str, use_cache: bool=True, cache_dir: Optional[str]=None):
         """

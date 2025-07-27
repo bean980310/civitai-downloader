@@ -6,7 +6,7 @@ from civitai_downloader.api.creators import CreatorsAPI
 from civitai_downloader.api.tags import TagsAPI
 from civitai_downloader.api.base import CIVITAI_API_URL, BaseAPI
 from civitai_downloader.api.client import CivitAIClient
-
+from civitai_downloader.api.user_agent import get_user_agent
 
 __all__=['CreatorsAPI', 'ImagesAPI', 'ModelsAPI', 'ModelAPI', 'ModelVersionAPI', 'TagsAPI', 'CIVITAI_API_URL', 'BaseAPI', 'CivitAIClient']
 
