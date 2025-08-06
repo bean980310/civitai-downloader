@@ -6,7 +6,8 @@ import getpass
 from pathlib import Path
 from typing import Optional
 
-TOKEN_FILE = Path.home() / '.civitai' / 'config'
+TOKEN_FILE_PATH = Path.home() / '.civitai' / 'config'
+TOKEN_FILE = os.environ.get("CIVITAI_TOKEN_FILE", TOKEN_FILE_PATH)
 CIVITAI_HOST = 'https://civitai.com'
 ENV_TOKEN_NAME = 'CIVITAI_TOKEN'
 
