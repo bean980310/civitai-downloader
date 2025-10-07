@@ -1,13 +1,13 @@
 from typing import Optional, Dict
 
-from civitai_downloader.api.base import BaseAPI, CIVITAI_API_URL
-from civitai_downloader.api.creators import CreatorsAPI
-from civitai_downloader.api.images import ImagesAPI
-from civitai_downloader.api.model_version import ModelVersionAPI
-from civitai_downloader.api.model import ModelAPI
-from civitai_downloader.api.models import ModelsAPI
-from civitai_downloader.api.tags import TagsAPI
-from civitai_downloader.api_class import (
+from civitai.api.base import BaseAPI, CIVITAI_API_URL
+from civitai.api.creators import CreatorsAPI
+from civitai.api.images import ImagesAPI
+from civitai.api.model_version import ModelVersionAPI
+from civitai.api.model import ModelAPI
+from civitai.api.models import ModelsAPI
+from civitai.api.tags import TagsAPI
+from civitai.api_class import (
     CreatorList, ImageList, Model, ModelList, ModelVersion, TagList,
     Sort, Period, ModelType, AllowCommercialUse, BaseModel, NsfwLevel
 )

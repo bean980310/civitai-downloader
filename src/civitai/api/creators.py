@@ -2,8 +2,8 @@ import requests
 from typing import Optional
 from typing import Dict
 
-from civitai_downloader.api.base import BaseAPI
-from civitai_downloader.api_class import Creator, CreatorList, Metadata
+from civitai.api.base import BaseAPI
+from civitai.api_class import Creator, CreatorList, Metadata
 
 class CreatorsAPI(BaseAPI):
     def list_creators(self, limit: Optional[int]=20, page: Optional[int]=1, query: Optional[str]=None)->CreatorList:

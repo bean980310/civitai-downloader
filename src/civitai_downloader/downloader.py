@@ -1,5 +1,5 @@
 from civitai_downloader.download import _civitai_download, _advanced_download, _url_download, _batch_download, _version_batch_download
-from civitai_downloader.api_class import ModelType, ModelFormat, ModelSize, ModelFp
+from civitai.api_class import ModelType, ModelFormat, ModelSize, ModelFp
 from civitai_downloader import login
 
 def civitai_download(model_version_id: int, local_dir: str, token: str=login(), use_cache: bool=True, cache_dir: str=None):

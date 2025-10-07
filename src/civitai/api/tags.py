@@ -1,8 +1,8 @@
 from typing import Optional, Dict
 import requests
 
-from civitai_downloader.api.base import BaseAPI
-from civitai_downloader.api_class import Tag, TagList, Metadata
+from civitai.api.base import BaseAPI
+from civitai.api_class import Tag, TagList, Metadata
 
 class TagsAPI(BaseAPI):
     def list_tags(self, limit: Optional[int]=20, page: Optional[int]=1, query: Optional[str]=None)->TagList:

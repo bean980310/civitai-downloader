@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from civitai_downloader.api_class.metadata import Metadata
+from civitai.api_class.metadata import Metadata
 
 @dataclass
 class Tag:

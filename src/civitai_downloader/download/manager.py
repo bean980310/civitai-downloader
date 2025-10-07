@@ -3,8 +3,8 @@ import os
 import threading
 from typing import List
 
-from civitai_downloader.api.client import CivitAIClient
-from civitai_downloader.api_class import ModelVersionFile
+from civitai.api.client import CivitAIClient
+from civitai.api_class import ModelVersionFile
 from civitai_downloader.download.handler import DownloadHandler
 
 class DownloadManager:

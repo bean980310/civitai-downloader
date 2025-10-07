@@ -8,8 +8,8 @@ import shutil
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from civitai_downloader.api_class import ModelVersionFile
-from civitai_downloader.api import CivitAIClient, get_user_agent
+from civitai.api_class import ModelVersionFile
+from civitai.api import CivitAIClient, get_user_agent
 from civitai_downloader.env import JupyterEnvironmentDetector
 from civitai_downloader.download.util import DownloadUtils
 from civitai_downloader.download.file_name_extractor import FileNameExtractor

@@ -3,8 +3,8 @@ import os
 from typing import Optional, Tuple
 from urllib.parse import urlsplit, parse_qs
 
-from civitai_downloader.api_class import ModelType, ModelFormat, ModelSize, ModelFp, ModelVersionFile
-from civitai_downloader.api.client import CivitAIClient
+from civitai.api_class import ModelType, ModelFormat, ModelSize, ModelFp, ModelVersionFile
+from civitai.api.client import CivitAIClient
 from civitai_downloader.download.file_name_extractor import FileNameExtractor
 from civitai_downloader.download.backend import Downloader  # or from .manager import DownloadManager
 # ↑ 프로젝트 구조에 따라 임포트 경로 조정

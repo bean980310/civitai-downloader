@@ -5,8 +5,8 @@ from typing import List, Optional, Tuple
 import requests
 import sys
 
-from civitai_downloader.api.client import CivitAIClient
-from civitai_downloader.api_class import ModelVersionFile
+from civitai.api.client import CivitAIClient
+from civitai.api_class import ModelVersionFile
 from civitai_downloader.download.file_name_extractor import FileNameExtractor
 from civitai_downloader.download.util import DownloadUtils
 from civitai_downloader.env import JupyterEnvironmentDetector

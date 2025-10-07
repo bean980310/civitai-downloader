@@ -1,7 +1,7 @@
 import os
 from civitai_downloader.download.download import civitai_download, advanced_download
 from civitai_downloader import login
-from civitai_downloader.api.model_version import ModelVersionAPI
+from civitai.api.model_version import ModelVersionAPI
 
 token=login()
 

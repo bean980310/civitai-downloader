@@ -1,4 +1,4 @@
-from civitai_downloader.api.creators import CreatorsAPI
+from civitai.api.creators import CreatorsAPI
 from civitai_downloader.token.token import get_token
 
 token=get_token()

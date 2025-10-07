@@ -1,8 +1,8 @@
 import requests
 from typing import Optional, Dict
 
-from civitai_downloader.api.base import BaseAPI
-from civitai_downloader.api_class import Image, ImageList, NsfwLevel, Sort, Period, Metadata
+from civitai.api.base import BaseAPI
+from civitai.api_class import Image, ImageList, NsfwLevel, Sort, Period, Metadata
 
 class ImagesAPI(BaseAPI):
     def list_images(self, 

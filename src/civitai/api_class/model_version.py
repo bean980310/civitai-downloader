@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any, Dict, List
 
-from civitai_downloader.api_class.common import ModelFp, ModelSize, ModelFormat, BaseModel
+from civitai.api_class.common import ModelFp, ModelSize, ModelFormat, BaseModel
 
 
 @dataclass

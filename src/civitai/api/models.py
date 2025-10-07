@@ -1,8 +1,8 @@
 from typing import Optional
 import requests
 
-from civitai_downloader.api.model import ModelAPI
-from civitai_downloader.api_class import Sort, Period, ModelType, AllowCommercialUse, BaseModel, ModelList, Metadata
+from civitai.api.model import ModelAPI
+from civitai.api_class import Sort, Period, ModelType, AllowCommercialUse, BaseModel, ModelList, Metadata
 
 
 class ModelsAPI(ModelAPI):

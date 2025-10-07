@@ -1,7 +1,7 @@
 import requests
 
-from civitai_downloader.api.base import BaseAPI
-from civitai_downloader.api_class import ModelVersion, ModelVersionFile, ModelVersionFileMetadata, ModelVersionImages
+from civitai.api.base import BaseAPI
+from civitai.api_class import ModelVersion, ModelVersionFile, ModelVersionFileMetadata, ModelVersionImages
 
 class ModelVersionAPI(BaseAPI):
     def get_model_version_info_from_api(self, model_version_id: int)->ModelVersion:

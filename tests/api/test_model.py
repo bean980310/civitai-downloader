@@ -1,5 +1,5 @@
-from civitai_downloader.api.model import ModelAPI
-from civitai_downloader.api.model_version import ModelVersionAPI
+from civitai.api.model import ModelAPI
+from civitai.api.model_version import ModelVersionAPI
 from civitai_downloader.token.token import get_token
 
 token=get_token()
