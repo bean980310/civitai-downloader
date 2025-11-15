@@ -9,12 +9,12 @@ from typing import Optional
 TOKEN_FILE_PATH = Path.home() / '.civitai' / 'config'
 TOKEN_FILE = os.environ.get("CIVITAI_TOKEN_FILE", TOKEN_FILE_PATH)
 CIVITAI_HOST = 'https://civitai.com'
-ENV_TOKEN_NAME = 'CIVITAI_TOKEN'
+ENV_TOKEN_NAME = 'CIVITAI_API_TOKEN'
 
 class TokenManager:
     """
     CivitAI 다운로드를 위한 토큰을 관리하는 클래스.
-    1) 환경 변수 (CIVITAI_TOKEN)
+    1) 환경 변수 (CIVITAI_API_TOKEN)
     2) 로컬 설정 파일 (~/.civitai/config)
     3) 사용자 입력 (prompt)
     순으로 우선순위를 두고 조회한다.
